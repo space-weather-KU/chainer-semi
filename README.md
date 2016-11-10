@@ -2,6 +2,7 @@
 Chainerの攻略本です
 
 GitHubの入り方(by tokuda)
+
 1.
 http://bit.ly/chainersemi
 にアクセスする。
