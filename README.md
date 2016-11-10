@@ -9,7 +9,8 @@ GitHubの入り方(by tokuda)
 6. これでGitHubで正式なユーザーとして登録できる。
 3. 村主さん（muranushi.gmail.com）に自分のアカウント名を知らせる。
 4. 村主さんから返信mailから招待をacceptする
-7. これで攻略本の変更もできるようになるはず。（試しにこのreadmeを変更してみよう）
+7. これで攻略本の変更もできるようになるはず。（試しにこのreadmeを変更してみよう）画面左上の鉛筆✎マークをクリックして編集します。
+
 
 - test - by Kawamura
 - test -by okada
