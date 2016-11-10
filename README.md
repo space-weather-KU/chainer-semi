@@ -19,6 +19,7 @@ GitHubの入り方(by tokuda)
 
 ```python
 import chainer
+print(chainer.__version__)
 ```
 
 # chainer-semi
