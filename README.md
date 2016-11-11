@@ -24,6 +24,7 @@ GitHubの入り方(by tokuda)
 - terrible english
 -　HI
 - and Muranushi
+- test - by Seki
 
 ## ソースコード
 
