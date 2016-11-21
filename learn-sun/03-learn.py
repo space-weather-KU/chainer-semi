@@ -22,7 +22,7 @@ from chainer import functions as F
 from chainer import Variable, optimizers
 
 image_size = 1023
-image_wavelength = 193
+image_wavelength = 1600
 
 def get_sun_image(time, wavelength = image_wavelength):
     try:
@@ -78,6 +78,12 @@ class SunPredictor(chainer.Chain):
             c1=L.Convolution2D(None, 2, 3,stride=2),
             c2=L.Convolution2D(None, 4, 3,stride=2),
             c3=L.Convolution2D(None, 8, 3,stride=2),
+            c4=L.Convolution2D(None, 16, 3,stride=2),
+            c5=L.Convolution2D(None, 32, 3,stride=2),
+            c6=L.Convolution2D(None, 64, 3,stride=2),
+            d6=L.Deconvolution2D(None, 32, 3,stride=2),
+            d5=L.Deconvolution2D(None, 16, 3,stride=2),
+            d4=L.Deconvolution2D(None, 8, 3,stride=2),
             d3=L.Deconvolution2D(None, 4, 3,stride=2),
             d2=L.Deconvolution2D(None, 2, 3,stride=2),
             d1=L.Deconvolution2D(None, 1, 3,stride=2)
@@ -90,6 +96,12 @@ class SunPredictor(chainer.Chain):
         h = f(self.c1(h))
         h = f(self.c2(h))
         h = f(self.c3(h))
+        h = f(self.c4(h))
+        h = f(self.c5(h))
+        h = f(self.c6(h))
+        h = f(self.d6(h))
+        h = f(self.d5(h))
+        h = f(self.d4(h))
         h = f(self.d3(h))
         h = f(self.d2(h))
         h = F.sigmoid(self.d1(h))
