@@ -22,7 +22,7 @@ from chainer import functions as F
 from chainer import Variable, optimizers
 
 image_size = 1023
-image_wavelength = 1600
+image_wavelength = 193
 
 def get_sun_image(time, wavelength = image_wavelength):
     try:
@@ -102,7 +102,7 @@ opt.use_cleargrads()
 opt.setup(model)
 
 t = datetime.datetime(2014,5,25,19,00,00)
-dt = datetime.timedelta(hours = 1)
+dt = datetime.timedelta(hours = 24)
 
 img_input = get_normalized_image_variable(t)
 plot_sun_image(img_input.data[0,0], "image-input.png", title = 'before')
