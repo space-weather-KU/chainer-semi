@@ -125,19 +125,21 @@ epoch = 0
 while True:
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
     print t
-    dt = datetime.timedelta(hours = 1)
+    dt = datetime.timedelta(hours = 4)
     img_input = get_normalized_image_variable(t)
     if img_input is None:
         continue
-    plot_sun_image(img_input.data[0,0], "image-rand-input.png", title = 'input')
+
+    vizualization_mode = (epoch%2 == 0)
+    if vizualization_mode: plot_sun_image(img_input.data[0,0], "image-rand-input.png", title = 'input')
 
     img_observed = get_normalized_image_variable(t+dt)
     if img_observed is None:
         continue
-    plot_sun_image(img_observed.data[0,0], "image-rand-observed.png", title = 'observed')
+    if vizualization_mode: plot_sun_image(img_observed.data[0,0], "image-rand-observed.png", title = 'observed')
 
     img_predicted = model(img_input)
-    plot_sun_image(img_predicted.data[0,0], "image-rand-predicted.png", title = 'train {}th epoch'.format(epoch))
+    if vizualization_mode: plot_sun_image(img_predicted.data[0,0], "image-rand-predicted.png", title = 'train {}th epoch'.format(epoch))
 
     loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
     model.cleargrads()
