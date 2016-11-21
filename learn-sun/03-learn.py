@@ -75,23 +75,24 @@ class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
             # the size of the inputs to each layer will be inferred
-            c1=L.Convolution2D(None,    20, 3,stride=2),
-            c2=L.Convolution2D(None,    40, 3,stride=2),
-            c3=L.Convolution2D(None,    80, 3,stride=2),
-            c4=L.Convolution2D(None,   160, 3,stride=2),
-            c5=L.Convolution2D(None,   320, 3,stride=2),
-            c6=L.Convolution2D(None,   640, 3,stride=2),
-            d6=L.Deconvolution2D(None, 320, 3,stride=2),
-            d5=L.Deconvolution2D(None, 160, 3,stride=2),
-            d4=L.Deconvolution2D(None,  80, 3,stride=2),
-            d3=L.Deconvolution2D(None,  40, 3,stride=2),
-            d2=L.Deconvolution2D(None,  20, 3,stride=2),
-            d1=L.Deconvolution2D(None,  10, 3,stride=2)
+            c1=L.Convolution2D(None,    2*2, 3,stride=2),
+            c2=L.Convolution2D(None,    4*2, 3,stride=2),
+            c3=L.Convolution2D(None,    8*2, 3,stride=2),
+            c4=L.Convolution2D(None,   16*2, 3,stride=2),
+            c5=L.Convolution2D(None,   32*2, 3,stride=2),
+            c6=L.Convolution2D(None,   64*2, 3,stride=2),
+            d6=L.Deconvolution2D(None, 32*2, 3,stride=2),
+            d5=L.Deconvolution2D(None, 16*2, 3,stride=2),
+            d4=L.Deconvolution2D(None,  8*2, 3,stride=2),
+            d3=L.Deconvolution2D(None,  4*2, 3,stride=2),
+            d2=L.Deconvolution2D(None,  2*2, 3,stride=2),
+            d1=L.Deconvolution2D(None,    1, 3,stride=2)
         )
 
 
     def __call__(self, x):
-        f = F.relu
+        def f(x) :
+            return F.elu(F.dropout(x))
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
