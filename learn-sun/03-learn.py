@@ -126,8 +126,9 @@ plot_sun_image(img_observed.data[0,0], "image-future-observed.png", title = 'aft
 epoch = 0
 while True:
     img_predicted = model(img_input)
-    plot_sun_image(img_predicted.data[0,0], "image-future-predicted.png", title = '{}th epoch'.format(epoch))
-    loss = F.sum((img_predicted - img_observed)**2)
+    if epoch%25 ==0:
+        plot_sun_image(img_predicted.data[0,0], "image-future-predicted.png", title = '{}th epoch'.format(epoch))
+    loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
     model.cleargrads()
     loss.backward()
     opt.update()
