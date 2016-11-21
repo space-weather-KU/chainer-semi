@@ -18,6 +18,7 @@ import random
 
 import chainer
 from chainer import datasets
+from chainer import serializers
 from chainer import links as L
 from chainer import functions as F
 from chainer import Variable, optimizers
@@ -49,6 +50,9 @@ def get_sun_image(time, wavelength = image_wavelength):
 
         chromosphere_image.verify("fix")
         exptime = chromosphere_image[1].header['EXPTIME']
+        if exptime <= 0.1:
+            return None
+
         original_width = chromosphere_image[1].data.shape[0]
         return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
     except Exception as e:
@@ -121,7 +125,7 @@ epoch = 0
 while True:
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
     print t
-    dt = datetime.timedelta(hours = 24)
+    dt = datetime.timedelta(hours = 1)
     img_input = get_normalized_image_variable(t)
     if img_input is None:
         continue
@@ -139,5 +143,6 @@ while True:
     model.cleargrads()
     loss.backward()
     opt.update()
+    serializers.save_npz('sun-predictor-1hr.model', model)
 
     epoch+=1
