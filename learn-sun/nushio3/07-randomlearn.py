@@ -50,7 +50,7 @@ def get_sun_image(time, wavelength = image_wavelength):
 
         chromosphere_image.verify("fix")
         exptime = chromosphere_image[1].header['EXPTIME']
-        if exptime <= 0.1:
+        if exptime <= 0:
             return None
 
         original_width = chromosphere_image[1].data.shape[0]
