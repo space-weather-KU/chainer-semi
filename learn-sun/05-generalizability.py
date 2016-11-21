@@ -75,24 +75,24 @@ class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
             # the size of the inputs to each layer will be inferred
-            c1=L.Convolution2D(None,    2, 3,stride=2),
-            c2=L.Convolution2D(None,    4, 3,stride=2),
-            c3=L.Convolution2D(None,    8, 3,stride=2),
-            c4=L.Convolution2D(None,   16, 3,stride=2),
-            c5=L.Convolution2D(None,   32, 3,stride=2),
-            c6=L.Convolution2D(None,   64, 3,stride=2),
-            d6=L.Deconvolution2D(None, 32, 3,stride=2),
-            d5=L.Deconvolution2D(None, 16, 3,stride=2),
-            d4=L.Deconvolution2D(None,  8, 3,stride=2),
-            d3=L.Deconvolution2D(None,  4, 3,stride=2),
-            d2=L.Deconvolution2D(None,  2, 3,stride=2),
-            d1=L.Deconvolution2D(None,  1, 3,stride=2)
+            c1=L.Convolution2D(None,    2*2, 3,stride=2),
+            c2=L.Convolution2D(None,    4*2, 3,stride=2),
+            c3=L.Convolution2D(None,    8*2, 3,stride=2),
+            c4=L.Convolution2D(None,   16*2, 3,stride=2),
+            c5=L.Convolution2D(None,   32*2, 3,stride=2),
+            c6=L.Convolution2D(None,   64*2, 3,stride=2),
+            d6=L.Deconvolution2D(None, 32*2, 3,stride=2),
+            d5=L.Deconvolution2D(None, 16*2, 3,stride=2),
+            d4=L.Deconvolution2D(None,  8*2, 3,stride=2),
+            d3=L.Deconvolution2D(None,  4*2, 3,stride=2),
+            d2=L.Deconvolution2D(None,  2*2, 3,stride=2),
+            d1=L.Deconvolution2D(None,    1, 3,stride=2)
         )
 
 
     def __call__(self, x):
         def f(x) :
-            return F.relu(x)
+            return F.elu(x)
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
@@ -121,16 +121,24 @@ img_input = get_normalized_image_variable(t)
 plot_sun_image(img_input.data[0,0], "image-input.png", title = 'before')
 
 img_observed = get_normalized_image_variable(t+dt)
-plot_sun_image(img_observed.data[0,0], "image-future-observed.png", title = 'after')
+plot_sun_image(img_observed.data[0,0], "image-train-observed.png", title = 'after')
+
+img_input_2 = get_normalized_image_variable(t+2*dt)
+plot_sun_image(img_input.data[0,0], "image-input-2.png", title = 'before')
+
+img_observed_2 = get_normalized_image_variable(t+3*dt)
+plot_sun_image(img_observed.data[0,0], "image-test-observed.png", title = 'after')
 
 
 epoch = 0
 while True:
     img_predicted = model(img_input)
-    if epoch%25 ==0:
-        plot_sun_image(img_predicted.data[0,0], "image-future-predicted.png", title = '{}th epoch'.format(epoch))
     loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
     model.cleargrads()
     loss.backward()
     opt.update()
+    if epoch%25 ==0:
+        plot_sun_image(img_predicted.data[0,0], "image-train-predicted.png", title = 'train {}th epoch'.format(epoch))
+        img_predicted_2 = model(img_input_2)
+        plot_sun_image(img_predicted_2.data[0,0], "image-test-predicted.png", title = 'test {}th epoch'.format(epoch))
     epoch+=1
