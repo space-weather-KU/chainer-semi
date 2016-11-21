@@ -92,7 +92,7 @@ class SunPredictor(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.elu(F.dropout(x))
+            return F.elu(x)
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
