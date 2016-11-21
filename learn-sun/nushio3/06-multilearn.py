@@ -118,7 +118,7 @@ t = datetime.datetime(2011,1,1,19,00,00)
 dt = datetime.timedelta(hours = 24)
 dt2 = datetime.timedelta(hours = 1183)
 
-training_data_size = 16
+training_data_size = 10
 
 img_input = {}
 img_observed = {}
