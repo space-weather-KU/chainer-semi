@@ -78,9 +78,9 @@ class SunPredictor(chainer.Chain):
             c1=L.Convolution2D(None, 2, 3,stride=2),
             c2=L.Convolution2D(None, 4, 3,stride=2),
             c3=L.Convolution2D(None, 8, 3,stride=2),
-            d3=L.Convolution2D(None, 4, 3,stride=2),
-            d2=L.Convolution2D(None, 2, 3,stride=2),
-            d1=L.Convolution2D(None, 1, 3,stride=2)
+            d3=L.Deconvolution2D(None, 4, 3,stride=2),
+            d2=L.Deconvolution2D(None, 2, 3,stride=2),
+            d1=L.Deconvolution2D(None, 1, 3,stride=2)
         )
 
 

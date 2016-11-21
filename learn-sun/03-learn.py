@@ -78,9 +78,9 @@ class SunPredictor(chainer.Chain):
             c1=L.Convolution2D(None, 2, 3,stride=2),
             c2=L.Convolution2D(None, 4, 3,stride=2),
             c3=L.Convolution2D(None, 8, 3,stride=2),
-            d3=L.Convolution2D(None, 4, 3,stride=2),
-            d2=L.Convolution2D(None, 2, 3,stride=2),
-            d1=L.Convolution2D(None, 1, 3,stride=2)
+            d3=L.Deconvolution2D(None, 4, 3,stride=2),
+            d2=L.Deconvolution2D(None, 2, 3,stride=2),
+            d1=L.Deconvolution2D(None, 1, 3,stride=2)
         )
 
 
@@ -97,6 +97,9 @@ class SunPredictor(chainer.Chain):
 
 
 model = SunPredictor()
+opt = chainer.optimizers.Adam()
+opt.use_cleargrads()
+opt.setup(model)
 
 t = datetime.datetime(2014,5,25,19,00,00)
 dt = datetime.timedelta(hours = 1)
@@ -107,5 +110,13 @@ plot_sun_image(img_input.data[0,0], "image-input.png", title = 'before')
 img_observed = get_normalized_image_variable(t+dt)
 plot_sun_image(img_observed.data[0,0], "image-future-observed.png", title = 'after')
 
-img_predicted = model(img_input)
-plot_sun_image(img_predicted.data[0,0], "image-future-predicted.png", title = 'after')
+
+epoch = 0
+while True:
+    img_predicted = model(img_input)
+    plot_sun_image(img_predicted.data[0,0], "image-future-predicted.png", title = '{}th epoch'.format(epoch))
+    loss = F.sum((img_predicted - img_observed)**2)
+    model.cleargrads()
+    loss.backward()
+    opt.update()
+    epoch+=1
