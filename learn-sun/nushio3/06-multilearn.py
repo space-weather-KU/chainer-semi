@@ -74,7 +74,6 @@ def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
-            # the size of the inputs to each layer will be inferred
             c1=L.Convolution2D(None,    2*2, 3,stride=2),
             c2=L.Convolution2D(None,    4*2, 3,stride=2),
             c3=L.Convolution2D(None,    8*2, 3,stride=2),

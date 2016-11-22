@@ -118,13 +118,13 @@ t = datetime.datetime(2014,5,25,19,00,00)
 dt = datetime.timedelta(hours = 24)
 
 img_input = get_normalized_image_variable(t)
-plot_sun_image(img_input.data[0,0], "image-input.png", title = 'before')
+plot_sun_image(img_input.data[0,0], "image-train-input.png", title = 'before')
 
 img_observed = get_normalized_image_variable(t+dt)
 plot_sun_image(img_observed.data[0,0], "image-train-observed.png", title = 'train observed')
 
 img_input_2 = get_normalized_image_variable(t+2*dt)
-plot_sun_image(img_input.data[0,0], "image-input-2.png", title = 'before')
+plot_sun_image(img_input.data[0,0], "image-test-input.png", title = 'before')
 
 img_observed_2 = get_normalized_image_variable(t+3*dt)
 plot_sun_image(img_observed_2.data[0,0], "image-test-observed.png", title = 'test observed')

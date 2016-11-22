@@ -70,7 +70,7 @@ def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=
     plt.savefig(filename)
     plt.close("all")
 
-
+# 未来の太陽を予言するようなモデルを作ります。
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(

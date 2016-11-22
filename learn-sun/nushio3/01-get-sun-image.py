@@ -18,6 +18,7 @@ import scipy.ndimage.interpolation as interpolation
 image_size = 1023
 image_wavelength = 1600
 
+# 時刻と波長を指定して、太陽の観測データを得ます
 def get_sun_image(time, wavelength = image_wavelength):
     time_str = time.strftime("%Y.%m.%d_%H:%M:%S")
 
@@ -44,6 +45,7 @@ def get_sun_image(time, wavelength = image_wavelength):
     original_width = chromosphere_image[1].data.shape[0]
     return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
 
+# 太陽の観測データをプロットします(カラーパレットは波長から決めます)
 def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmax = 1.0):
     cmap = plt.get_cmap('sdoaia{}'.format(wavelength))
     plt.title(title)

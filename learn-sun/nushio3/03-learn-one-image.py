@@ -71,6 +71,7 @@ def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=
     plt.close("all")
 
 
+# convolution層を６層に増やした予報モデルです。
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
@@ -117,6 +118,7 @@ opt.setup(model)
 t = datetime.datetime(2014,5,25,19,00,00)
 dt = datetime.timedelta(hours = 24)
 
+# 1つの画像対にかんして、ひたすら訓練を繰り返します。
 img_input = get_normalized_image_variable(t)
 plot_sun_image(img_input.data[0,0], "image-input.png", title = 'before')
 
