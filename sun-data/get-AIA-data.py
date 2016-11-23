@@ -37,3 +37,4 @@ chromosphere_image.verify("fix")
 print(type(chromosphere_image[1].data))
 print(chromosphere_image[1].data.shape)
 print chromosphere_image[1].header['EXPTIME']
+print chromosphere_image[1].header
