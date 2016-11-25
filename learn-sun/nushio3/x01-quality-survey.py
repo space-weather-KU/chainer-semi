@@ -50,7 +50,7 @@ def get_sun_image(time, wavelength = image_wavelength):
         exptime = chromosphere_image[1].header['EXPTIME']
         original_width = chromosphere_image[1].data.shape[0]
 
-        print chromosphere_image[1].header['QUALITY']
+        print time, "QUALITY=", chromosphere_image[1].header['QUALITY']
         return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
     except Exception as e:
         print e.message
@@ -115,18 +115,14 @@ opt = chainer.optimizers.Adam()
 opt.use_cleargrads()
 opt.setup(model)
 
-t = datetime.datetime(2011,1,1,19,00,00)
-dt = datetime.timedelta(hours = 24)
-dt2 = datetime.timedelta(hours = 1183)
+t = datetime.datetime(2013,1,1,00,00,00)
+dt2 = datetime.timedelta(hours = 1)
 
-training_data_size = 20
+training_data_size = 48
 
 img_input = {}
 img_observed = {}
 
 for i in range(training_data_size):
     img_input[i] = get_normalized_image_variable(dt2*i + t)
-    plot_sun_image(img_input[i].data[0,0], "image-train-{}-input.png".format(i), title = 'train {} input'.format(i))
-
-    img_observed[i] = get_normalized_image_variable(dt2*i + t+dt)
-    plot_sun_image(img_observed[i].data[0,0], "image-train-{}-observed.png".format(i), title = 'train {} observed'.format(i))
+    plot_sun_image(img_input[i].data[0,0], "image-quality-{}-input.png".format(i), title = 'train {} input'.format(i))

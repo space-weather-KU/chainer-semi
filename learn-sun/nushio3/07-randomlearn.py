@@ -24,7 +24,7 @@ from chainer import functions as F
 from chainer import Variable, optimizers
 
 image_size = 1023
-image_wavelength = 1600
+image_wavelength = 211
 
 def get_sun_image(time, wavelength = image_wavelength):
     try:
@@ -145,6 +145,6 @@ while True:
     model.cleargrads()
     loss.backward()
     opt.update()
-    serializers.save_npz('sun-predictor-1hr.model', model)
+    serializers.save_npz('sun-predictor-193-4hr.model', model)
 
     epoch+=1
