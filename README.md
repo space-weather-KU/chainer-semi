@@ -26,6 +26,7 @@ GitHubの入り方(by tokuda)
 - and Muranushi
 - test - by Seki
 - test by Nakamura
+- test by Hishinuma
 
 ## ソースコード
 
