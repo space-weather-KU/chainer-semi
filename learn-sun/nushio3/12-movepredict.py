@@ -59,7 +59,7 @@ def get_sun_image(time, wavelength = image_wavelength):
         original_width = chromosphere_image[1].data.shape[0]
         return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
     except Exception as e:
-        print e.message
+        print(e.message)
         return None
 
 def get_normalized_image_variable(time, wavelength = image_wavelength):
@@ -126,8 +126,9 @@ opt.setup(model)
 
 epoch = 0
 while True:
+    print("epoch: ", epoch)
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
-    print t
+    print(t)
     dt = datetime.timedelta(hours = 4)
 
     img_inputs = []
@@ -142,15 +143,15 @@ while True:
     img_input = F.concat(img_inputs, axis=1)
 
     vizualization_mode = (epoch%10 == 0)
-    if vizualization_mode: plot_sun_image(img_input.data[0,0], "image-rand-input.png", title = 'input')
+    if vizualization_mode: plot_sun_image(img_input.data[0,0], "image-mover-input.png", title = 'input')
 
     img_observed = get_normalized_image_variable(t+dt)
     if img_observed is None:
         continue
-    if vizualization_mode: plot_sun_image(img_observed.data[0,0], "image-rand-observed.png", title = 'observed')
+    if vizualization_mode: plot_sun_image(img_observed.data[0,0], "image-mover-observed.png", title = 'observed')
 
     img_predicted = model(img_input)
-    if vizualization_mode: plot_sun_image(img_predicted.data[0,0], "image-rand-predicted.png", title = 'train {}th epoch'.format(epoch))
+    if vizualization_mode: plot_sun_image(img_predicted.data[0,0], "image-mover-predicted.png", title = 'train {}th epoch'.format(epoch))
 
     loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
     model.cleargrads()
