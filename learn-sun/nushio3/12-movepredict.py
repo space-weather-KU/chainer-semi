@@ -130,16 +130,18 @@ while True:
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
     print(t)
     dt = datetime.timedelta(hours = 4)
+    dtfrac = datetime.timedelta(hours = 1)
 
     img_inputs = []
-    for fac in [0,0.25,0.5,1,2]:
-        t0 = t - dt * fac
-        img = get_normalized_image_variable(t)
+    for fac in [0,1,2,4,8]:
+        t0 = t - dtfrac * fac
+        img = get_normalized_image_variable(t0)
         if img is None:
             img_inputs = None
             break
         img_inputs.append(img)
-
+    if img_inputs is None:
+        continue
     img_input = F.concat(img_inputs, axis=1)
 
     vizualization_mode = (epoch%10 == 0)

@@ -166,6 +166,11 @@ feature_array=np.concatenate(features, axis=0)
 
 print feature_array.shape
 
+with open("sun-feature.txt",'w') as fp:
+    for i in range(feature_array.shape[0]):
+        fp.write(" ".join([str(x) for x in feature_array[i]]) + "\n")
+
+
 pca = PCA(n_components=120)
 pca.fit(feature_array)
 feature_pca = pca.transform(feature_array)
@@ -174,5 +179,4 @@ print feature_pca.shape
 
 with open("sun-pca.txt",'w') as fp:
     for i in range(feature_pca.shape[0]):
-
         fp.write(" ".join([str(x) for x in feature_pca[i]]) + "\n")
