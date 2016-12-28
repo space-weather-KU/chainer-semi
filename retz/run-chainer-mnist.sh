@@ -1,0 +1,1 @@
+/opt/retz-client/bin/retz-client  run -A nushio   -c 'apt-get update && apt-get -y install python-pip python-dev && pip install chainer && python $MESOS_SANDBOX/chainer-1.19.0/examples/mnist/train_mnist.py --gpu 0'   --mem 16000 --gpu 1 --cpu 8 -E CUDA_PATH=/usr/local/cuda
