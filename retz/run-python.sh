@@ -1,1 +1,1 @@
-/opt/retz-client/bin/retz-client  run -A nushio -c 'wget https://raw.githubusercontent.com/space-weather-KU/chainer-semi/master/learn-sun/nushio3/01-get-sun-image.py -O hello.py && python hello.py' --stderr  --mem 16000 --gpu 1 --cpu 8 -E CUDA_PATH=/usr/local/cuda
+/opt/retz-client/bin/retz-client  run -A nushio -c 'python 01-get-sun-image.py' --stderr  --mem 16000 --gpu 1 --cpu 8 -E CUDA_PATH=/usr/local/cuda
