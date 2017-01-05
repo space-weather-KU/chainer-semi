@@ -149,7 +149,7 @@ t0 = datetime.datetime(2016,11,20,00,06,00)
 dt = datetime.timedelta(minutes=12)
 
 
-n=120
+n=480
 
 features = []
 
@@ -171,7 +171,7 @@ with open("sun-feature.txt",'w') as fp:
         fp.write(" ".join([str(x) for x in feature_array[i]]) + "\n")
 
 
-pca = PCA(n_components=120)
+pca = PCA(n_components=n)
 pca.fit(feature_array)
 feature_pca = pca.transform(feature_array)
 
