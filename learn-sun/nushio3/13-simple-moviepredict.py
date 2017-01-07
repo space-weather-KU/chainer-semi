@@ -14,6 +14,7 @@ import matplotlib.patches as ptc
 from matplotlib.dates import *
 import math
 import scipy.ndimage.interpolation as interpolation
+import subprocess
 import random
 
 import chainer
@@ -36,7 +37,7 @@ def get_sun_image(time, wavelength = image_wavelength):
         data = json.loads(response.read())
         filename = data['segments'][0]['values'][0]
         url = "http://jsoc.stanford.edu"+filename
-        chromosphere_image = fits.open(url)   # download the data
+        chromosphere_image = fits.open(url, cached=False)   # download the data
 
         T_REC = data['keywords'][0]['values'][0]
         CROTA2_AIA = float(data['keywords'][1]['values'][0])
@@ -127,7 +128,7 @@ while True:
     dt = datetime.timedelta(hours = dt_hours)
 
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
-    print t
+    print epoch, t
     img_input = get_normalized_image_variable(t)
     if img_input is None:
         continue
@@ -155,3 +156,5 @@ while True:
             t2 += dt
             img_input = model(img_input)
             plot_sun_image(img_input.data[0,0], "image-predict-{}.png".format(i), title = '{}'.format(t2))
+        subprocess.call("zip images.zip -r *.png", shell=True)
+        subprocess.call("base64 images.zip > images.zip.base64",shell=True)
