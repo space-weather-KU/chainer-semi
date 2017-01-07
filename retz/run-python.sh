@@ -6,4 +6,4 @@
 # retz-client schedule -A nushio -c 'python 01-get-sun-image.py'  --mem 1000 --cpu 1
 # retz-client schedule -A nushio -c 'python 04-perfect-memoization.py'  --mem 6000 --cpu 1
 # retz-client run -A nushio4 -c 'python 04-perfect-memoization.py' --stderr --mem 6000 --cpu 1
-retz-client schedule -A nushio4 -c 'python 04-perfect-memoization.py' --mem 6000 --cpu 1
+retz-client schedule -A nushio64 -c 'python 04-perfect-memoization-base64.py' --mem 6000 --cpu 1
