@@ -152,9 +152,9 @@ while True:
         plot_sun_image(img_observed.data[0,0], "image-observed.png", title = 'observed at {}'.format(t+dt))
 
         t2 = t
-        for i in range(10):
+        for i in range(6):
             t2 += dt
             img_input = model(img_input)
-            plot_sun_image(img_input.data[0,0], "image-predict-{}.png".format(i), title = '{}'.format(t2))
+            plot_sun_image(img_input.data[0,0], "image-predict-{}.png".format(i), title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
         subprocess.call("zip images.zip -r *.png", shell=True)
         subprocess.call("base64 images.zip > images.zip.base64",shell=True)
