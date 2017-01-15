@@ -4,3 +4,10 @@ RETZの使い方
 
 
 # Windows編
+
+## 1. Javaランタイムのインストール
+
+Anaconda Prompt, もしくはコマンドプロンプトで`java　-version`と打ってみてください。すでにjavaがインストールされている場合は、とくにインストールの必要はありません。
+Javaがなければ、こちらからインストールしてください。　https://www.java.com/ja/download/help/download_options.xml
+
+
