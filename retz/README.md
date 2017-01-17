@@ -152,7 +152,7 @@ INFO Saving images.zip to ./images.zip
 ## 1. Javaランタイムのインストール
 
 Anaconda Prompt, もしくはコマンドプロンプトで`java　-version`と打ってみてください。これがjavaのバージョンを返す場合は、すでにjavaがインストールされています。とくにインストールの必要はありません。
-Javaがなければ、こちらからインストールしてください。　https://www.java.com/ja/download/help/download_options.xml
+Javaがなければ、こちらから最新版のJava Runtime Environmentインストールしてください。　https://www.java.com/ja/download/help/download_options.xml
 
 ## 2. Retz 本体の使用
 
@@ -183,4 +183,4 @@ Windows用に調整したUSBディスクを渡します。
 二乗誤差とAdversarial Networkの性質の違いを端的に理解するには,画像着色の例が分かりやすいです。
 - この論文の図1をご覧ください http://cs231n.stanford.edu/reports2016/224_Report.pdf ("Automatic Colorization with Deep Convolutional Generative Adversarial
 Networks", Stephen Koo)
-- または、題材がアニメ寄りですが、この記事をご覧ください http://qiita.com/taizan/items/cf77fd37ec3a0bef5d9d
+- または、題材がアニメ寄りで、苦手な方には申し訳ありませんが、この記事をご覧ください http://qiita.com/taizan/items/cf77fd37ec3a0bef5d9d
