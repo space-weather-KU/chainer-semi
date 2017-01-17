@@ -178,7 +178,7 @@ Windows用に調整したUSBディスクを渡します。
 という技術が大変有効です。
 
 ちょうど、Generative Adversarial Networkに関するチュートリアルが公開されました。 https://arxiv.org/abs/1701.00160
-次はこれをみんなで読みましょう。
+("NIPS 2016 Tutorial: Generative Adversarial Networks" Ian Goodfellow)次はこれをみんなで読みましょう。
 
 二乗誤差とAdversarial Networkの性質の違いを端的に理解するには,画像着色の例が分かりやすいです。
 - この論文の図1をご覧ください http://cs231n.stanford.edu/reports2016/224_Report.pdf ("Automatic Colorization with Deep Convolutional Generative Adversarial
