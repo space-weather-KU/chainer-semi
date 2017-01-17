@@ -169,4 +169,18 @@ Windows用に調整したUSBディスクを渡します。
 上記のステップで、太陽活動を予測し、太陽が回転しているようにみえる動画が作れるはずです。
 
 # さらに先に進むには？
-参考文献　https://arxiv.org/abs/1701.00160
+
+ここまでは、画像の類似度を単にピクセルごとの色の二乗誤差で判定していました。
+そのため、どうしても、ある程度ボケた画像が生成されてしまっていました。
+
+この次の段階に進むには、「太陽画像っぽさ」を判定する「Adversarial Network」を作り、
+判定者に「太陽画像っぽい」と判定してもらえるよう最適な画像を生成するという、Generative Adversarial Network
+という技術が大変有効です。
+
+ちょうど、Generative Adversarial Networkに関するチュートリアルが公開されました。 https://arxiv.org/abs/1701.00160
+次はこれをみんなで読みましょう。
+
+二乗誤差とAdversarial Networkの性質の違いを端的に理解するには,画像着色の例が分かりやすいです。
+- この論文の図1をご覧ください http://cs231n.stanford.edu/reports2016/224_Report.pdf ("Automatic Colorization with Deep Convolutional Generative Adversarial
+Networks", Stephen Koo)
+- または、題材がアニメ寄りですが、この記事をご覧ください http://qiita.com/taizan/items/cf77fd37ec3a0bef5d9d
