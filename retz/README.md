@@ -32,6 +32,105 @@ INFO 	load-app	Load an applitation that you want to run (io.github.retz.cli.Comm
 
 各コマンドの詳しい解説はこちらにあります　https://github.com/retz/retz/blob/master/doc/api.rst#client-cli-and-api
 
+また、` retz-client help -s <コマンド>`とすると、コマンドごとのヘルプを見ることができます。
+
+```
+$ retz-client help -s list
+INFO Usage: list(list all jobs) [options]
+  Options:
+    --state
+      State of jobs
+      Default: QUEUED
+      Possible Values: [CREATED, QUEUED, STARTING, STARTED, FINISHED, KILLED]
+    --tag
+      Tag name to show
+```
+
+## 設定
+
+`retz-client`はJavaで書かれています。ですので、Javaが走る環境であれば、`retz-client-*.*.*-all.jar`さえあれば使えます(`*`はバージョン情報です。)
+
+クライアントの接続先などの大切な認証情報は、`retz.properties`というファイルで管理しています。このファイルはみなさん専用のものを個別に配布しますので、他人に見られないように保管して下さい。
+
+`retz-client-*.jar -C retz.properties`
+
+
+## load-app
+
+仮想マシンはdockerを使って作れます。
+
+- dockerのチュートリアル https://docs.docker.com/engine/getstarted/
+- 今回用意した仮想マシンイメージ https://hub.docker.com/r/nushio3/chainer-semi/
+
+load-appで、仮想マシンイメージを指定して「アプリケーション」を作ります。
+
+```
+retz-client load-app -A movie-predict-nushio \
+  --container docker --image nushio3/chainer-semi \
+  -F https://github.com/pfnet/chainer/archive/v1.19.0.tar.gz \
+  -F https://raw.githubusercontent.com/space-weather-KU/chainer-semi/master/learn-sun/nushio3/01-get-sun-image.py \
+  -F https://raw.githubusercontent.com/space-weather-KU/chainer-semi/master/learn-sun/nushio3/13-simple-moviepredict.py \
+  --user root
+```
+
+## run
+
+指定した仮想マシンを実行します。
+
+```
+retz-client run -A movie-predict-nushio -c 'apt-get update && apt-get -y install zip && python 13-simple-moviepredict.py' --mem 6000 --cpu 1 --stderr
+```
+
+## list
+
+仮想マシンの一覧をstateごとに表示します。たとえば、現在実行中(`STARTED`)のマシンの一覧を表示するには次のようにします。
+
+この表の2行目に表示されているのがタスク番号です。以降、仮想マシンの操作にはこのタスク番号を指定します。
+
+```
+$ retz-client list --state STARTED
+WARN DANGER ZONE: TLS certificate check is disabled. Set 'retz.tls.insecure = false' at config file to supress this message.
+INFO TaskId State   AppName              Command                                                                      Result Duration Scheduled                     Started                       Finished Tags
+INFO 49     STARTED movie-predict-nushio apt-get update && apt-get -y install zip && python 13-simple-moviepredict.py -      -        2017-01-15T16:25:38.941+09:00 2017-01-15T16:25:48.762+09:00 N/A
+```
+
+## list-files
+
+仮想マシン上のファイルの一覧を取得します。`retz-client list-files -i <タスク番号>`
+
+```
+$ retz-client list-files -i 49
+WARN DANGER ZONE: TLS certificate check is disabled. Set 'retz.tls.insecure = false' at config file to supress this message.
+INFO gid  mode       uid  mtime               size    path
+INFO root -rw-r--r-- root 2017-01-15 16:25:48 2491    01-get-sun-image.py
+INFO root -rw-r--r-- root 2017-01-15 16:25:48 5499    13-simple-moviepredict.py
+INFO root drwxrwxr-x root 2016-12-15 13:13:33 4096    chainer-1.19.0
+INFO root -rw-r--r-- root 2017-01-17 07:22:23 379827  image-input.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:23 380600  image-observed.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:25 274479  image-predict-0.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:27 268710  image-predict-1.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:28 264928  image-predict-2.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:30 262774  image-predict-3.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:31 261907  image-predict-4.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:33 260779  image-predict-5.png
+INFO root -rw-r--r-- root 2017-01-17 07:22:33 2337332 images.zip
+INFO root -rw-r--r-- root 2017-01-17 07:22:33 3157450 images.zip.base64
+INFO root -rw-r--r-- root 2017-01-17 10:56:41 3218892 stderr
+INFO root -rw-r--r-- root 2017-01-17 13:49:37 3870208 stdout
+INFO root -rw-r--r-- root 2017-01-17 07:23:58 736541  sun-predictor-211-4hr.model
+INFO root -rw-r--r-- root 2017-01-15 16:25:47 2109252 v1.19.0.tar.gz
+```
+
+## get-file
+
+仮想マシンから指定したファイル名のファイルを取得します。
+
+```
+$ retz-client get-file -i 49 --path images.zip -R .
+WARN DANGER ZONE: TLS certificate check is disabled. Set 'retz.tls.insecure = false' at config file to supress this message.
+INFO Saving images.zip to ./images.zip
+```
+
 # Windows編
 
 ## 1. Javaランタイムのインストール
