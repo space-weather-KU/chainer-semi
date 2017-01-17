@@ -6,7 +6,7 @@
 
 RETZの公式ドキュメント　https://gist.github.com/kuenishi/2c6b505b34db6aa77e0f61314473a57c
 
-＃ 使い方
+# 使い方
 retz-clientをインストールした状態で、｀retz-client｀とだけタイプすると、以下のように、コマンド一覧を表示してくれます。
 
 ```
@@ -55,6 +55,10 @@ INFO Usage: list(list all jobs) [options]
 `retz-client-*.jar -C retz.properties`
 
 
+## コマンド紹介
+
+これらのコマンド例は、 https://github.com/space-weather-KU/chainer-semi/tree/master/retz に`*.sh`というファイル名で保存してあります。
+
 ## load-app
 
 仮想マシンはdockerを使って作れます。
@@ -64,22 +68,34 @@ INFO Usage: list(list all jobs) [options]
 
 load-appで、仮想マシンイメージを指定して「アプリケーション」を作ります。
 
+なお,`\`は長い行を区切る記号で、実際には`\`を抜いて、一行で入力して下さい。
+
 ```
 retz-client load-app -A movie-predict-nushio \
   --container docker --image nushio3/chainer-semi \
-  -F https://github.com/pfnet/chainer/archive/v1.19.0.tar.gz \
-  -F https://raw.githubusercontent.com/space-weather-KU/chainer-semi/master/learn-sun/nushio3/01-get-sun-image.py \
   -F https://raw.githubusercontent.com/space-weather-KU/chainer-semi/master/learn-sun/nushio3/13-simple-moviepredict.py \
   --user root
 ```
 
+- `-A` アプリケーション名を指定
+- `--image` dockerhubに存在する仮想マシンイメージを紹介
+- `-F` 起動時に読み込んでおくファイルのURLを指定
+- `--mem` メモリ量を指定(単位はMB)
+- そのほか、`retz-client help -s load-app`を参照！
+
+
 ## run
 
-指定した仮想マシンを実行します。
+指定したアプリケーションを実行します。
 
 ```
 retz-client run -A movie-predict-nushio -c 'apt-get update && apt-get -y install zip && python 13-simple-moviepredict.py' --mem 6000 --cpu 1 --stderr
 ```
+
+- `-A` アプリケーション名を指定
+- `-c` 起動時に実行するコマンドを指定
+- `--mem` メモリ量を指定(単位はMB)
+- そのほか、`retz-client help -s run`を参照！
 
 ## list
 
@@ -126,7 +142,7 @@ INFO root -rw-r--r-- root 2017-01-15 16:25:47 2109252 v1.19.0.tar.gz
 仮想マシンから指定したファイル名のファイルを取得します。
 
 ```
-$ retz-client get-file -i 49 --path images.zip -R .
+$ retz-client get-file -i 49 --binary --path images.zip -R .
 WARN DANGER ZONE: TLS certificate check is disabled. Set 'retz.tls.insecure = false' at config file to supress this message.
 INFO Saving images.zip to ./images.zip
 ```
