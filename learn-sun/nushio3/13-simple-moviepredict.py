@@ -37,7 +37,7 @@ def get_sun_image(time, wavelength = image_wavelength):
         data = json.loads(response.read())
         filename = data['segments'][0]['values'][0]
         url = "http://jsoc.stanford.edu"+filename
-        chromosphere_image = fits.open(url, cached=False)   # download the data
+        chromosphere_image = fits.open(url, cached=True)   # download the data
 
         T_REC = data['keywords'][0]['values'][0]
         CROTA2_AIA = float(data['keywords'][1]['values'][0])
