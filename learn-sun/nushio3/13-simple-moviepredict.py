@@ -146,6 +146,8 @@ while True:
     serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelength, dt_hours), model)
 
     epoch+=1
+    
+    subprocess.call("rm /tmp/*", shell=True)
 
     if vizualization_mode:
         plot_sun_image(img_input.data[0,0], "image-input.png", title = 'input at {}'.format(t))
