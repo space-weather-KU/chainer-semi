@@ -25,7 +25,7 @@ from chainer import functions as F
 from chainer import Variable, optimizers
 
 image_size = 1023
-image_wavelength = 211
+image_wavelength = 1600
 dt_hours = 4
 
 def get_sun_image(time, wavelength = image_wavelength):
