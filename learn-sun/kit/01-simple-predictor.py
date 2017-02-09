@@ -39,7 +39,7 @@ gpuid=0
 
 if "debug" in sys.argv:
     initial_learn_count = 20
-    end_time = datetime.datetime(2012,1,10)    
+    end_time = datetime.datetime(2012,1,31)    
 
 """
 The model
@@ -150,8 +150,8 @@ def predict(training_mode):
     prediction_data = float(str(prediction.data[0,0]))
     observation_data = float(str(observation.data[0,0]))
 
-    prediction_log.append(PredictionItem(t, prediction_data, observation_data))
-    print("PL",len(prediction_log))
+    if not training_mode:
+        prediction_log.append(PredictionItem(t, prediction_data, observation_data))
 
     with open("log.txt", "a") as fp:
         msg = "{} {} {} {}".format(t, training_mode, prediction_data, observation_data)
@@ -184,7 +184,6 @@ while current_time < end_time:
 
 wct_end = datetime.datetime.now()
 
-print("PL len", len(prediction_log), file=sys.stderr )
 
 #予報実験の結果をまとめたプロットを作ります。
 def plot_history():
@@ -197,18 +196,16 @@ def plot_history():
     
     t = prediction_begin_time
     while True:
-        print(t)
         if t > end_time:
             break
         data_t.append(t) 
-        data_goes_max.append(goes_max(t, datetime.timedelta(hours=24)) )
+        data_goes_max.append(np.log10(goes_max(t, datetime.timedelta(hours=24)) ))
         t += datetime.timedelta(minutes=12)
     
     plt.plot(data_t, data_goes_max, color="b")
     data_prediction_t = [i.time for i in prediction_log]
     data_prediction_y = [i.prediction for i in prediction_log]
-
-    plt.plot(data_prediction_t, data_prediction_y, color="ro")
+    plt.plot(data_prediction_t, data_prediction_y, "ro")
     
     daysFmt = mdates.DateFormatter('%Y-%m-%d')
     yearLoc = mdates.YearLocator()
@@ -221,8 +218,6 @@ def plot_history():
     plt.gca().set_title('GOES Flux')
     plt.gca().set_xlabel('International Atomic Time')
     plt.gca().set_ylabel(u'GOES Long[1-8A] Xray Flux')
-    plt.gca().set_yscale('log')
-    
             
     plt.savefig("prediction-history.png", dpi=100)
     plt.close('all')
@@ -246,5 +241,13 @@ def plot_scatter():
 plot_history()
 plot_scatter()
 
+
+
+avg_num = 0
+avg_den = 0
+for i in prediction_log:
+    avg_num += abs(i.prediction - i.observation)
+    avg_den += 1
+
+print("Average  error:", avg_num / avg_den)
 print("Wall clock time: ", wct_end -  wct_begin)
-print("Average  error:", )
