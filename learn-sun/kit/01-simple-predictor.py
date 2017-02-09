@@ -27,7 +27,8 @@ Learning parameters
 begin_time = datetime.datetime(2011,1,1)
 end_time = datetime.datetime(2016,1,1)
 step_time = datetime.timedelta(days=1)
-current_time = datetime.datetime(2012,1,1)
+prediction_begin_time = datetime.datetime(2012,1,1)
+current_time = prediction_begin_time
 
 initial_learn_count = 1000
 learn_per_predict = 3
@@ -35,6 +36,10 @@ learn_per_predict = 3
 wavelength = 211
 
 gpuid=0
+
+if "debug" in sys.argv:
+    initial_learn_count = 20
+    end_time = datetime.datetime(2012,2,1)    
 
 """
 The model
@@ -104,6 +109,13 @@ def save():
     except:
         pass
 
+class PredictionItem:
+    def __init__(self, t, p, o):
+        self.time = t
+        self.prediction = p
+        self.observation = o
+
+prediction_log = []
 
 def predict(training_mode):
     if not training_mode:
@@ -131,8 +143,12 @@ def predict(training_mode):
         loss.backward()
         optimizer.update()
 
+    prediction_data = float(str(prediction.data[0,0]))
+    observation_data = float(str(observation.data[0,0]))
+    prediction_log.append(PredictionItem(t, prediction_data, observation_data))
+
     with open("log.txt", "a") as fp:
-        msg = "{} {} {} {}".format(t, training_mode, prediction.data[0,0], observation.data[0,0])
+        msg = "{} {} {} {}".format(t, training_mode, prediction_data, observation_data)
         fp.write(msg + "\n")
 
 
@@ -150,7 +166,7 @@ for i in range(initial_learn_count):
         print("learning: ", i, "/", initial_learn_count )
         save()
 
-#時間をpredit_step_hour時間づつ進めながら、予報実験をしていきます。
+#時間をstep_timeづつ進めながら、予報実験をしていきます。
 while current_time < end_time:
     predict(training_mode = False)
     print("predicting: ", t, "/", predict_count)
@@ -160,3 +176,54 @@ while current_time < end_time:
     current_time += step_time
 
 
+#予報実験の結果をまとめたプロットを作ります。
+def plot_history():
+    plt.rcParams['figure.figsize'] = (60, 6)
+    
+    data_t = []
+    data_goes_max = []
+    
+    t = prediction_begin_time
+    while True:
+        print(t)
+        if t > end_time:
+            break
+        data_t.append(t) 
+        data_goes_max.append(O.goes_max(t, datetime.timedelta(hours=24)) )
+        t += datetime.timedelta(minutes=12)
+    
+    plt.plot(data_t, data_goes_max, color="b")
+    
+    daysFmt = mdates.DateFormatter('%Y-%m-%d')
+    yearLoc = mdates.YearLocator()
+    monthLoc = mdates.MonthLocator()
+    plt.gca().xaxis.set_major_locator(yearLoc)
+    plt.gca().xaxis.set_major_formatter(daysFmt)
+    plt.gca().xaxis.set_minor_locator(monthLoc)
+    plt.gca().grid()
+    plt.gcf().autofmt_xdate()
+    plt.gca().set_title('GOES Flux')
+    plt.gca().set_xlabel('International Atomic Time')
+    plt.gca().set_ylabel(u'GOES Long[1-8A] Xray Flux')
+    plt.gca().set_yscale('log')
+    
+            
+    plt.savefig("prediction-history.png", dpi=100)
+    plt.close('all')
+    
+def plot_scatter():
+    plt.rcParams['figure.figsize'] = (10, 10)
+
+    # generate data
+    x = [i.observation for i in prediction_log]
+    y = [i.prediction for i in prediction_log]
+    
+
+    plt.gca().set_title('GOES Flux')
+    plt.gca().set_xlabel('observation')
+    plt.gca().set_ylabel('prediction')
+    plt.gca().grid()
+    plt.scatter(x,y,color="r")
+
+    plt.savefig("prediction-observation.png", dpi=100)
+    plt.close('all')
