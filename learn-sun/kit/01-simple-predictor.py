@@ -175,12 +175,14 @@ for i in range(initial_learn_count):
 #時間をstep_timeづつ進めながら、予報実験をしていきます。
 while current_time < end_time:
     predict(training_mode = False)
-    print("predicting: ", current_time, "/", end_time , file=sys.stderr )
+    if "debug" in sys.argv:
+        print("predicting: ", current_time, "/", end_time , file=sys.stderr )
 
     for i in range(learn_per_predict):
         predict(training_mode = True)
     current_time += step_time
 
+save()
 
 wct_end = datetime.datetime.now()
 
