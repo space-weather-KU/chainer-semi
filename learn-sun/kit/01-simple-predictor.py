@@ -70,8 +70,7 @@ class SunPredictor(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        h = f(self.l2(h))
-        return h
+        return self.l2(h)
 
 def get_normalized_image_variable(time, wavelength):
     img = get_sun_image(time, wavelength)
@@ -93,27 +92,36 @@ optimizer.use_cleargrads()
 optimizer.setup(model)
 
 def save():
-    serializers.save_npz("model.save", model)
-    serializers.save_npz("optimizer.save", optimizer)
-
+    try:
+        serializers.save_npz("model.save", model)
+        serializers.save_npz("optimizer.save", optimizer)
+    except:
+        pass
 
 
 def predict(training_mode):
-    if training_mode:
+    if not training_mode:
         t = current_time
     else:
-        learning_span = current_time - time_begin - datetime.timedelta(hours=24)
-        t = time_begin + random.random() + learning_span
+        learning_span = current_time - begin_time - datetime.timedelta(hours=24)
+        while True:
+            t = begin_time + random.random() * learning_span
+            t2 = datetime.datetime(t.year, t.month,t.day, t.hour)
+            if t2 < begin_time + learning_span:
+                t = t2
+                break
 
     img = get_normalized_image_variable(t, wavelength)
+    if img is None:
+        return
     observation = get_normalized_output_variable(t)
 
     prediction = model(img)
+    model.cleargrads()
 
-    loss = abs(prediction-observation)
+    loss = F.sqrt(F.sum(prediction-observation) ** 2)
 
     if training_mode:
-        model.cleargrads()
         loss.backward()
         optimizer.update()
 
