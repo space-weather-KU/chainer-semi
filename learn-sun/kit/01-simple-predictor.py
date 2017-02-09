@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import observational_data
 
 import datetime, math,os, random,scipy.ndimage, sys, math
