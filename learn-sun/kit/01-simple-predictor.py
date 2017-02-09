@@ -27,14 +27,15 @@ Learning parameters
 
 begin_time = datetime.datetime(2011,1,1)
 end_time = datetime.datetime(2016,1,1)
-step_time = datetime.timedelta(days=1)
+step_time = datetime.timedelta(hours=1)
 prediction_begin_time = datetime.datetime(2012,1,1)
 current_time = prediction_begin_time
-
-initial_learn_count = 1000
-learn_per_predict = 3
+initial_learn_count = 10000
+learn_per_predict = 10
 
 wavelength = 211
+
+prediction_timedelta=datetime.timedelta(hours=24) 
 
 gpuid=0
 
@@ -92,7 +93,7 @@ def get_normalized_image_variable(time, wavelength):
 
 
 def get_normalized_output_variable(time):
-    ret = np.log10(max(1e-10,goes_max(time, datetime.timedelta(days=1))))
+    ret = np.log10(max(1e-10,goes_max(time, prediction_timedelta )))
     x = Variable(np.array([[ret]]).astype(np.float32))
     x.to_gpu()
     return x
@@ -126,7 +127,7 @@ def predict(training_mode):
     if not training_mode:
         t = current_time
     else:
-        learning_span = current_time - begin_time - datetime.timedelta(hours=24)
+        learning_span = current_time - begin_time - prediction_timedelta
         while True:
             t = begin_time + random.random() * learning_span
             t2 = datetime.datetime(t.year, t.month,t.day, t.hour)
@@ -166,14 +167,14 @@ Learning logic / many thanks to Hishinuma-san
 
 wct_begin = datetime.datetime.now()
 
-# まず、最初の1年間で練習します
+# Train the predictor using the first year data
 for i in range(initial_learn_count):
     predict(training_mode = True)
     if i % 100 == 0:
         print("learning: ", i, "/", initial_learn_count, file=sys.stderr )
         save()
 
-#時間をstep_timeづつ進めながら、予報実験をしていきます。
+# Execute the Prediction
 while current_time < end_time:
     predict(training_mode = False)
     if "debug" in sys.argv:
@@ -188,7 +189,7 @@ save()
 wct_end = datetime.datetime.now()
 
 
-#予報実験の結果をまとめたプロットを作ります。
+# Plot the results
 def plot_history():
 
     plt.rcParams['figure.figsize'] = (300, 6)
@@ -202,7 +203,7 @@ def plot_history():
         if t > end_time:
             break
         data_t.append(t) 
-        data_goes_max.append(np.log10(goes_max(t, datetime.timedelta(hours=24)) ))
+        data_goes_max.append(np.log10(goes_max(t, prediction_timedelta) ))
         t += datetime.timedelta(minutes=12)
     
     plt.plot(data_t, data_goes_max, color="b")
