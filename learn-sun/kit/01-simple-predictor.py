@@ -169,7 +169,7 @@ for i in range(initial_learn_count):
 #時間をstep_timeづつ進めながら、予報実験をしていきます。
 while current_time < end_time:
     predict(training_mode = False)
-    print("predicting: ", t, "/", predict_count)
+    print("predicting: ", current_time, "/", end_time)
 
     for i in range(learn_per_predict):
         predict(training_mode = True)
