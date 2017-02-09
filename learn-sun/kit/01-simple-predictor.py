@@ -34,6 +34,7 @@ learn_per_predict = 3
 
 wavelength = 211
 
+gpuid=0
 
 """
 The model
@@ -80,17 +81,21 @@ def get_normalized_image_variable(time, wavelength):
     img = img[np.newaxis, np.newaxis, :, :]
     img = img.astype(np.float32)
     x = Variable(np.log(np.maximum(1,img)))
-    return x
+    return x.to_gpu()
 
 def get_normalized_output_variable(time):
     ret = np.log10(max(1e-10,goes_max(time, datetime.timedelta(days=1))))
-    return Variable(np.array([[ret]]).astype(np.float32))
+    return Variable(np.array([[ret]]).astype(np.float32)).to_gpu()
 
 
 model = SunPredictor()
 optimizer = chainer.optimizers.Adam()
 optimizer.use_cleargrads()
 optimizer.setup(model)
+
+if gpuid >= 0:
+    chainer.cuda.get_device(gpuid).use()  # Make a specified GPU current
+    model.to_gpu()  
 
 def save():
     try:
