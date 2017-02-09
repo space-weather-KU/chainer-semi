@@ -39,7 +39,7 @@ gpuid=0
 
 if "debug" in sys.argv:
     initial_learn_count = 20
-    end_time = datetime.datetime(2012,2,1)    
+    end_time = datetime.datetime(2012,1,10)    
 
 """
 The model
@@ -86,11 +86,15 @@ def get_normalized_image_variable(time, wavelength):
     img = img[np.newaxis, np.newaxis, :, :]
     img = img.astype(np.float32)
     x = Variable(np.log(np.maximum(1,img)))
-    return x.to_gpu()
+    x.to_gpu()
+    return x
+
 
 def get_normalized_output_variable(time):
     ret = np.log10(max(1e-10,goes_max(time, datetime.timedelta(days=1))))
-    return Variable(np.array([[ret]]).astype(np.float32)).to_gpu()
+    x = Variable(np.array([[ret]]).astype(np.float32))
+    x.to_gpu()
+    return x
 
 
 model = SunPredictor()
@@ -145,7 +149,9 @@ def predict(training_mode):
 
     prediction_data = float(str(prediction.data[0,0]))
     observation_data = float(str(observation.data[0,0]))
+
     prediction_log.append(PredictionItem(t, prediction_data, observation_data))
+    print("PL",len(prediction_log))
 
     with open("log.txt", "a") as fp:
         msg = "{} {} {} {}".format(t, training_mode, prediction_data, observation_data)
@@ -157,29 +163,35 @@ def predict(training_mode):
 Learning logic / many thanks to Hishinuma-san
 """
 
-
+wct_begin = datetime.datetime.now()
 
 # まず、最初の1年間で練習します
 for i in range(initial_learn_count):
     predict(training_mode = True)
     if i % 100 == 0:
-        print("learning: ", i, "/", initial_learn_count )
+        print("learning: ", i, "/", initial_learn_count, file=sys.stderr )
         save()
 
 #時間をstep_timeづつ進めながら、予報実験をしていきます。
 while current_time < end_time:
     predict(training_mode = False)
-    print("predicting: ", current_time, "/", end_time)
+    print("predicting: ", current_time, "/", end_time , file=sys.stderr )
 
     for i in range(learn_per_predict):
         predict(training_mode = True)
     current_time += step_time
 
 
+wct_end = datetime.datetime.now()
+
+print("PL len", len(prediction_log), file=sys.stderr )
+
 #予報実験の結果をまとめたプロットを作ります。
 def plot_history():
-    plt.rcParams['figure.figsize'] = (60, 6)
-    
+
+    plt.rcParams['figure.figsize'] = (300, 6)
+    if "debug" in sys.argv:    
+        plt.rcParams['figure.figsize'] = (10, 6)
     data_t = []
     data_goes_max = []
     
@@ -189,10 +201,14 @@ def plot_history():
         if t > end_time:
             break
         data_t.append(t) 
-        data_goes_max.append(O.goes_max(t, datetime.timedelta(hours=24)) )
+        data_goes_max.append(goes_max(t, datetime.timedelta(hours=24)) )
         t += datetime.timedelta(minutes=12)
     
     plt.plot(data_t, data_goes_max, color="b")
+    data_prediction_t = [i.time for i in prediction_log]
+    data_prediction_y = [i.prediction for i in prediction_log]
+
+    plt.plot(data_prediction_t, data_prediction_y, color="ro")
     
     daysFmt = mdates.DateFormatter('%Y-%m-%d')
     yearLoc = mdates.YearLocator()
@@ -227,3 +243,8 @@ def plot_scatter():
 
     plt.savefig("prediction-observation.png", dpi=100)
     plt.close('all')
+plot_history()
+plot_scatter()
+
+print("Wall clock time: ", wct_end -  wct_begin)
+print("Average  error:", )
