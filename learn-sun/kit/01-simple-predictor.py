@@ -20,6 +20,13 @@ import chainer.links as L
 from chainer import optimizers
 from chainer import serializers
 
+"""
+What kind of forecast you are doing
+"""
+prediction_timedelta=datetime.timedelta(hours=4) 
+
+
+
 
 """
 Learning parameters
@@ -30,12 +37,10 @@ end_time = datetime.datetime(2016,1,1)
 step_time = datetime.timedelta(hours=1)
 prediction_begin_time = datetime.datetime(2012,1,1)
 current_time = prediction_begin_time
-initial_learn_count = 10000
-learn_per_predict = 10
+initial_learn_count = 1000
+learn_per_predict = 3
 
-wavelength = 211
-
-prediction_timedelta=datetime.timedelta(hours=24) 
+wavelength = 94
 
 gpuid=0
 
@@ -100,7 +105,7 @@ def get_normalized_output_variable(time):
 
 
 model = SunPredictor()
-optimizer = chainer.optimizers.Adam()
+optimizer = chainer.optimizers.SMORMS3()
 optimizer.use_cleargrads()
 optimizer.setup(model)
 
@@ -127,7 +132,7 @@ def predict(training_mode):
     if not training_mode:
         t = current_time
     else:
-        learning_span = current_time - begin_time - prediction_timedelta
+        learning_span = current_time - begin_time - prediction_timedelta - datetime.timedelta(hours=1)
         while True:
             t = begin_time + random.random() * learning_span
             t2 = datetime.datetime(t.year, t.month,t.day, t.hour)
