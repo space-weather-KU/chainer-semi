@@ -34,6 +34,11 @@ optimizer_g = chainer.optimizers.SMORMS3()
 
 dt_hours = 4
 
+gpuid=0
+if gpuid >= 0:
+    chainer.cuda.get_device(gpuid).use()
+
+
 """
 Returns the brightness-normalized image of the Sun
 depending on the wavelength.
@@ -46,14 +51,15 @@ def get_normalized_image_variable(time, wavelength):
     img = img.astype(np.float32)
     x = Variable(img)
     if wavelength == 211:
-        return F.sigmoid(x / 100)
+        ret = F.sigmoid(x / 100)
     elif wavelength == 193:
-        return F.sigmoid(x / 300)
+        ret = F.sigmoid(x / 300)
     elif wavelength == 94:
-        return F.sigmoid(x / 30)
+        ret = F.sigmoid(x / 30)
     else:
-        return F.log(F.max(1,x))
-
+        ret = F.log(F.max(1,x))
+    ret.to_gpu()
+    return ret
 
 """
 Plot the image of the sun using the
@@ -149,6 +155,11 @@ optimizer_g.setup(generator)
 discriminator = Discriminator()
 optimizer_d.use_cleargrads()
 optimizer_d.setup(discriminator)
+
+if gpuid >= 0:
+    predictor.to_gpu()
+    generator.to_gpu()
+    discriminator.to_gpu()
 
 epoch = 0
 while True:
