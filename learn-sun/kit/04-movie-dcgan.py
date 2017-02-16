@@ -30,7 +30,7 @@ image_wavelengths = [211]
 optimizer_p = chainer.optimizers.SMORMS3()
 optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
-start_dcgan_at_epoch=1000
+start_dcgan_at_epoch=0
 
 dt_hours = 4
 
@@ -146,7 +146,7 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        return F.sigmoid(self.l2(h) * 1e-3)
+        return self.l2(h)
 
 
 
@@ -237,12 +237,12 @@ while True:
             img_op = F.concat([img_forecast, img_future])
             img_og = F.concat([img_forecast, img_generated])
 
-            loss_d = - F.log(discriminator(img_op)) - F.log(1 - discriminator(img_og))
+            loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
             discriminator.cleargrads()
             loss_d.backward()
             optimizer_d.update()
 
-            loss_g = - F.log(discriminator(img_og))
+            loss_g = (discriminator(img_og)-1)**2
             generator.cleargrads()
             loss_g.backward()
             optimizer_g.update()
