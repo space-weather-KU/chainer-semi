@@ -105,7 +105,7 @@ class SunPredictor(chainer.Chain):
 
 class Discriminator(chainer.Chain):
     def __init__(self):
-        super(SunPredictor, self).__init__(
+        super(Discriminator, self).__init__(
             c1=L.Convolution2D(None,    4, 3,stride=2),
             c2=L.Convolution2D(None,    8, 3,stride=2),
             c3=L.Convolution2D(None,   16, 3,stride=2),
