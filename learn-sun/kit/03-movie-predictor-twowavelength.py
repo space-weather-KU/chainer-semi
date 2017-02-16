@@ -29,6 +29,7 @@ from chainer import Variable, optimizers
 image_size = 1023
 image_wavelengths = [211,193]
 image_wavelength = "no default"
+optimizer = chainer.optimizers.SMORMS3()
 
 dt_hours = 4
 
@@ -71,7 +72,7 @@ class SunPredictor(chainer.Chain):
             d4=L.Deconvolution2D(None, 16, 3,stride=2),
             d3=L.Deconvolution2D(None,  8, 3,stride=2),
             d2=L.Deconvolution2D(None,  4, 3,stride=2),
-            d1=L.Deconvolution2D(None,  2, 3,stride=2)
+            d1=L.Deconvolution2D(None,  len(image_wavelengths), 3,stride=2)
         )
 
 
@@ -95,9 +96,8 @@ class SunPredictor(chainer.Chain):
 
 
 model = SunPredictor()
-opt = chainer.optimizers.Adam()
-opt.use_cleargrads()
-opt.setup(model)
+optimizer.use_cleargrads()
+optimizer.setup(model)
 
 epoch = 0
 while True:
@@ -136,7 +136,7 @@ while True:
     loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
     model.cleargrads()
     loss.backward()
-    opt.update()
+    optimizer.update()
 
 
     if vizualization_mode:
