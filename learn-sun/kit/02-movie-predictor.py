@@ -96,6 +96,9 @@ opt.setup(model)
 
 epoch = 0
 while True:
+    epoch+=1
+
+
     vizualization_mode = (epoch%10 == 0)
     dt = datetime.timedelta(hours = dt_hours)
 
@@ -115,8 +118,6 @@ while True:
     model.cleargrads()
     loss.backward()
     opt.update()
-
-    epoch+=1
 
     if vizualization_mode:
         serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelength, dt_hours), model)
