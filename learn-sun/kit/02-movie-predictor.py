@@ -40,9 +40,9 @@ def get_normalized_image_variable(time, wavelength = image_wavelength):
     img = img[np.newaxis, np.newaxis, :, :]
     img = img.astype(np.float32)
     x = Variable(img)
-    ret =  F.sigmoid(x / 100)
     if gpuid >= 0:
-        ret.to_gpu()
+        x.to_gpu()
+    ret =  F.sigmoid(x / 100)
     return ret
 
 
