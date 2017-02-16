@@ -47,6 +47,9 @@ def get_normalized_image_variable(time, wavelength = image_wavelength):
 
 
 def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=0.5, vmax = 1.0):
+    if gpuid >= 0:
+        img = img.get()
+
     cmap = plt.get_cmap('sdoaia{}'.format(wavelength))
     plt.title(title)
     plt.imshow(img,cmap=cmap,origin='lower',vmin=vmin, vmax=vmax)

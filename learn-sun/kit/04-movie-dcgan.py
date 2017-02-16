@@ -69,6 +69,9 @@ Plot the image of the sun using the
 SDO-AIA map.
 """
 def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
+    if gpuid >= 0:
+        img = img.get()
+
     cmap = plt.get_cmap('sdoaia{}'.format(wavelength))
     plt.title(title)
     plt.imshow(img,cmap=cmap,origin='lower',vmin=vmin, vmax=vmax)
