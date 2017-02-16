@@ -27,7 +27,6 @@ from chainer import functions as F
 from chainer import Variable, optimizers
 
 image_wavelengths = [211,193]
-image_wavelength = "no default"
 optimizer_p = chainer.optimizers.SMORMS3()
 optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
@@ -177,27 +176,27 @@ while True:
     t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(hours = random.randrange(24*365*5))
     print(epoch, t)
 
-    img_inputs = []
-    img_observeds = []
+    channel_inputs = []
+    channel_observeds = []
     no_image = False
     for w in image_wavelengths:
-        img_input = get_normalized_image_variable(t,w)
-        if img_input is None:
+        channel_input = get_normalized_image_variable(t,w)
+        if channel_input is None:
             no_image = True
             continue
-        img_inputs.append(img_input)
+        channel_inputs.append(channel_input)
 
-        img_observed = get_normalized_image_variable(t+dt,w)
-        if img_observed is None:
+        channel_observed = get_normalized_image_variable(t+dt,w)
+        if channel_observed is None:
             no_image = True
             continue
-        img_observeds.append(img_observed)
+        channel_observeds.append(channel_observed)
 
     if no_image:
         continue
 
-    img_input = F.concat(img_inputs)
-    img_observed = F.concat(img_observeds)
+    img_input = F.concat(channel_inputs)
+    img_observed = F.concat(channel_observeds)
 
     img_predicted = predictor(img_input)
 
@@ -212,28 +211,29 @@ while True:
     """
     t2 = t
     no_missing_image = True
-    img_future = img_input
+    img_forecast = img_input
     for i in range(1,7):
         t2 = t + i*dt
-        img_future = predictor(img_future)
-        img_futureobserveds = []
+        img_forecast = predictor(img_forecast)
+
+        channel_futures = []
         for w in image_wavelengths:
-            img_futureobserved = get_normalized_image_variable(t2,w)
-            if img_futureobserved is None:
+            channel_future = get_normalized_image_variable(t2,w)
+            if channel_future is None:
                 no_image = True
                 continue
-            img_futureobserveds.append(img_futureobserved)
+            channel_futures.append(channel_future)
 
         if no_image: # some wavelength is not available for this t2
             no_missing_image = False
             continue
 
-        img_futureobserved = F.concat(img_futureobserveds)
+        img_future = F.concat(channel_futures)
 
-        img_generated = generator(img_future)
+        img_generated = generator(img_forecast)
 
-        img_op = F.concat([img_future, img_futureobserved])
-        img_og = F.concat([img_future, img_generated])
+        img_op = F.concat([img_forecast, img_future])
+        img_og = F.concat([img_forecast, img_generated])
 
         loss_d = abs(discriminator(img_op) - 1) + abs(discriminator(img_og) + 1)
         discriminator.cleargrads()
@@ -261,15 +261,15 @@ while True:
                            wavelength,
                            title = 'observed at {}'.format(t+dt))
 
-        img_future = img_input
+        img_forecast = img_input
         for i in range(1,7):
             t2 = t + i*dt
-            img_future = predictor(img_future)
-            img_generated = generator(img_future)
+            img_forecast = predictor(img_forecast)
+            img_generated = generator(img_forecast)
 
             for c in range(len(image_wavelengths)):
                 wavelength = image_wavelengths[c]
-                plot_sun_image(img_future.data[0,c],
+                plot_sun_image(img_forecast.data[0,c],
                                "aia{}-image-predict-{}.png".format(wavelength, i),
                                wavelength,
                                title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
