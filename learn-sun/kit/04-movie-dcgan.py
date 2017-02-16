@@ -145,7 +145,7 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        return F.sigmoid(self.l2(h))
+        return F.sigmoid(self.l2(h) * 1e-3)*0.998+0.001
 
 
 
