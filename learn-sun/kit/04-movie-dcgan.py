@@ -216,23 +216,23 @@ while True:
     for i in range(1,7):
         t2 = t + i*dt
         img_future = predictor(img_future)
-        img_observeds = []
+        img_futureobserveds = []
         for w in image_wavelengths:
-            img_observed = get_normalized_image_variable(t2,w)
-            if img_observed is None:
+            img_futureobserved = get_normalized_image_variable(t2,w)
+            if img_futureobserved is None:
                 no_image = True
                 continue
-            img_observeds.append(img_observed)
+            img_futureobserveds.append(img_futureobserved)
 
         if no_image: # some wavelength is not available for this t2
             no_missing_image = False
             continue
 
-        img_observed = F.concat(img_observeds)
+        img_futureobserved = F.concat(img_futureobserveds)
 
         img_generated = generator(img_future)
 
-        img_op = F.concat([img_future, img_observed])
+        img_op = F.concat([img_future, img_futureobserved])
         img_og = F.concat([img_future, img_generated])
 
         loss_d = abs(discriminator(img_op) - 1) + abs(discriminator(img_og) + 1)
@@ -252,7 +252,7 @@ while True:
         for c in range(len(image_wavelengths)):
             wavelength = image_wavelengths[c]
 
-            plot_sun_image(img_future.data[0,c],
+            plot_sun_image(img_input.data[0,c],
                            "aia{}-image-input.png".format(wavelength),
                            wavelength,
                            title = 'input at {}'.format(t))
