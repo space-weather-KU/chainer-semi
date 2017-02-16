@@ -32,6 +32,8 @@ optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
 start_dcgan_at_epoch=0
 
+use_textbook_dcgan = True
+
 dt_hours = 4
 
 gpuid=0
@@ -134,7 +136,7 @@ class Discriminator(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.elu(x)
+            return F.dropout(F.leaky_relu(x))
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
@@ -146,7 +148,10 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        return self.l2(h)
+        if use_textbook_dcgan:
+            return F.sigmoid(self.l2(h))
+        else:
+            return self.l2(h)
 
 
 
@@ -237,12 +242,20 @@ while True:
             img_op = F.concat([img_forecast, img_future])
             img_og = F.concat([img_forecast, img_generated])
 
-            loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
+            if use_textbook_dcgan:
+                loss_d = -0.9 * F.log(discriminator(img_op)) \
+                         -0.1 * F.log(1 - discriminator(img_op)) \
+                         - F.log(1 - discriminator(img_og))
+            else:
+                loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
             discriminator.cleargrads()
             loss_d.backward()
             optimizer_d.update()
 
-            loss_g = (discriminator(img_og)-1)**2
+            if use_textbook_dcgan:
+                loss_g = -F.log(discriminator(img_og))
+            else:
+                loss_g = (discriminator(img_og)-1)**2
             generator.cleargrads()
             loss_g.backward()
             optimizer_g.update()
@@ -255,7 +268,7 @@ while True:
                     print("epoch",epoch, "range",i,\
                           "L(dis)",loss_d.data.get()[0,0],\
                           "L(gen)",loss_g.data.get()[0,0],\
-                          "D(pred)",d_op,\
+                          "D(future)",d_op,\
                           "D(gen)",d_og,\
                           file=fp)
 
