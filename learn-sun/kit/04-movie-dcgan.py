@@ -245,7 +245,8 @@ while True:
         loss_g.backward()
         optimizer_g.update()
 
-
+        with open("log.txt"."a") as fp:
+            print("range",i,"L(dis)",loss_d, "L(gen)",loss_g, file=fp)
 
 
     if visualization_mode:
