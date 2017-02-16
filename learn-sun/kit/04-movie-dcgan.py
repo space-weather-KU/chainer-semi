@@ -25,6 +25,7 @@ from chainer import serializers
 from chainer import links as L
 from chainer import functions as F
 from chainer import Variable, optimizers
+import chainer.cuda as xp
 
 image_wavelengths = [211]
 optimizer_p = chainer.optimizers.SMORMS3()
@@ -148,12 +149,11 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        if use_textbook_dcgan:
-            return F.sigmoid(self.l2(h))
-        else:
-            return self.l2(h)
+        return self.l2(h)
 
 
+def sigmoid_cross_entropy(x,z):
+    return F.relu(x) - x * z + F.log(1 + F.exp(-abs(x)))
 
 predictor = SunPredictor()
 optimizer_p.use_cleargrads()
@@ -243,9 +243,11 @@ while True:
             img_og = F.concat([img_forecast, img_generated])
 
             if use_textbook_dcgan:
-                loss_d = -0.9 * F.log(discriminator(img_op)) \
-                         -0.1 * F.log(1 - discriminator(img_op)) \
-                         - F.log(1 - discriminator(img_og))
+                loss_d = sigmoid_cross_entropy(discriminator(img_op), 0.9) + \
+                         sigmoid_cross_entropy(discriminator(img_og), 0.0)
+                #loss_d = -0.9 * F.log(discriminator(img_op)) \
+                #         -0.1 * F.log(1 - discriminator(img_op)) \
+                #         - F.log(1 - discriminator(img_og))
             else:
                 loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
             discriminator.cleargrads()
@@ -253,7 +255,8 @@ while True:
             optimizer_d.update()
 
             if use_textbook_dcgan:
-                loss_g = -F.log(discriminator(img_og))
+                loss_g = sigmoid_cross_entropy(discriminator(img_og), 1.0)
+                #loss_g = -F.log(discriminator(img_og))
             else:
                 loss_g = (discriminator(img_og)-1)**2
             generator.cleargrads()
@@ -262,12 +265,12 @@ while True:
 
             if visualization_mode:
                 with open("log.txt","a") as fp:
-                    d_op = discriminator(img_op).data.get()[0,0]
-                    d_og = discriminator(img_og).data.get()[0,0]
+                    d_op = discriminator(img_op).data.get()
+                    d_og = discriminator(img_og).data.get()
 
                     print("epoch",epoch, "range",i,\
-                          "L(dis)",loss_d.data.get()[0,0],\
-                          "L(gen)",loss_g.data.get()[0,0],\
+                          "L(dis)",loss_d.data.get(),\
+                          "L(gen)",loss_g.data.get(),\
                           "D(future)",d_op,\
                           "D(gen)",d_og,\
                           file=fp)
