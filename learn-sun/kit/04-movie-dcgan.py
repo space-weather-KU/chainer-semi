@@ -26,10 +26,11 @@ from chainer import links as L
 from chainer import functions as F
 from chainer import Variable, optimizers
 
-image_wavelengths = [211,193]
+image_wavelengths = [211]
 optimizer_p = chainer.optimizers.SMORMS3()
 optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
+start_dcgan_at_epoch=1000
 
 dt_hours = 4
 
@@ -145,7 +146,7 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        return F.sigmoid(self.l2(h) * 1e-3)*0.998+0.001
+        return F.sigmoid(self.l2(h) * 1e-3)
 
 
 
@@ -212,50 +213,51 @@ while True:
     t2 = t
     no_missing_image = True
     img_forecast = img_input
-    for i in range(1,7):
-        t2 = t + i*dt
-        img_forecast = predictor(img_forecast)
+    if epoch >= start_dcgan_at_epoch :
+        for i in range(1,7):
+            t2 = t + i*dt
+            img_forecast = predictor(img_forecast)
 
-        channel_futures = []
-        for w in image_wavelengths:
-            channel_future = get_normalized_image_variable(t2,w)
-            if channel_future is None:
-                no_image = True
+            channel_futures = []
+            for w in image_wavelengths:
+                channel_future = get_normalized_image_variable(t2,w)
+                if channel_future is None:
+                    no_image = True
+                    continue
+                channel_futures.append(channel_future)
+
+            if no_image: # some wavelength is not available for this t2
+                no_missing_image = False
                 continue
-            channel_futures.append(channel_future)
 
-        if no_image: # some wavelength is not available for this t2
-            no_missing_image = False
-            continue
+            img_future = F.concat(channel_futures)
 
-        img_future = F.concat(channel_futures)
+            img_generated = generator(img_forecast)
 
-        img_generated = generator(img_forecast)
+            img_op = F.concat([img_forecast, img_future])
+            img_og = F.concat([img_forecast, img_generated])
 
-        img_op = F.concat([img_forecast, img_future])
-        img_og = F.concat([img_forecast, img_generated])
+            loss_d = - F.log(discriminator(img_op)) - F.log(1 - discriminator(img_og))
+            discriminator.cleargrads()
+            loss_d.backward()
+            optimizer_d.update()
 
-        loss_d = - F.log(discriminator(img_op)) - F.log(1 - discriminator(img_og))
-        discriminator.cleargrads()
-        loss_d.backward()
-        optimizer_d.update()
+            loss_g = - F.log(discriminator(img_og))
+            generator.cleargrads()
+            loss_g.backward()
+            optimizer_g.update()
 
-        loss_g = - F.log(discriminator(img_og))
-        generator.cleargrads()
-        loss_g.backward()
-        optimizer_g.update()
+            if visualization_mode:
+                with open("log.txt","a") as fp:
+                    d_op = discriminator(img_op).data.get()[0,0]
+                    d_og = discriminator(img_og).data.get()[0,0]
 
-        if visualization_mode:
-            with open("log.txt","a") as fp:
-                d_op = discriminator(img_op).data.get()[0,0]
-                d_og = discriminator(img_og).data.get()[0,0]
-
-                print("epoch",epoch, "range",i,\
-                      "L(dis)",loss_d.data.get()[0,0],\
-                      "L(gen)",loss_g.data.get()[0,0],\
-                      "D(pred)",d_op,\
-                      "D(gen)",d_og,\
-                      file=fp)
+                    print("epoch",epoch, "range",i,\
+                          "L(dis)",loss_d.data.get()[0,0],\
+                          "L(gen)",loss_g.data.get()[0,0],\
+                          "D(pred)",d_op,\
+                          "D(gen)",d_og,\
+                          file=fp)
 
 
     if visualization_mode:
