@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import matplotlib
 matplotlib.use('Agg')
@@ -17,6 +17,8 @@ import scipy.ndimage.interpolation as interpolation
 import subprocess
 import random
 
+from observational_data import *
+
 import chainer
 from chainer import datasets
 from chainer import serializers
@@ -28,37 +30,6 @@ image_size = 1023
 image_wavelength = 211
 dt_hours = 4
 
-def get_sun_image(time, wavelength = image_wavelength):
-    try:
-        time_str = time.strftime("%Y.%m.%d_%H:%M:%S")
-
-        url = "http://jsoc.stanford.edu/cgi-bin/ajax/jsoc_info?ds=aia.lev1[{}_TAI/12s][?WAVELNTH={}?]&op=rs_list&key=T_REC,CROTA2,CDELT1,CDELT2,CRPIX1,CRPIX2,CRVAL1,CRVAL2&seg=image_lev1".format(time_str, wavelength)
-        response = urllib.urlopen(url)
-        data = json.loads(response.read())
-        filename = data['segments'][0]['values'][0]
-        url = "http://jsoc.stanford.edu"+filename
-        chromosphere_image = fits.open(url, cached=False)   # download the data
-
-        T_REC = data['keywords'][0]['values'][0]
-        CROTA2_AIA = float(data['keywords'][1]['values'][0])
-        CDELT1_AIA = float(data['keywords'][2]['values'][0])
-        CDELT2_AIA = float(data['keywords'][3]['values'][0])
-        CRPIX1_AIA = float(data['keywords'][4]['values'][0])
-        CRPIX2_AIA = float(data['keywords'][5]['values'][0])
-        CRVAL1_AIA = float(data['keywords'][6]['values'][0])
-        CRVAL2_AIA = float(data['keywords'][7]['values'][0])
-
-
-        chromosphere_image.verify("fix")
-        exptime = chromosphere_image[1].header['EXPTIME']
-        if exptime <= 0:
-            return None
-
-        original_width = chromosphere_image[1].data.shape[0]
-        return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
-    except Exception as e:
-        print e.message
-        return None
 
 def get_normalized_image_variable(time, wavelength = image_wavelength):
     img = get_sun_image(time, wavelength)
@@ -70,7 +41,6 @@ def get_normalized_image_variable(time, wavelength = image_wavelength):
     return F.sigmoid(x / 100)
 
 
-
 def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=0.5, vmax = 1.0):
     cmap = plt.get_cmap('sdoaia{}'.format(wavelength))
     plt.title(title)
@@ -79,10 +49,12 @@ def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=
     plt.close("all")
 
 
+"""
+The neural network model for predicting the next frame of the sun
+"""
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
-            # the size of the inputs to each layer will be inferred
             c1=L.Convolution2D(None,    4, 3,stride=2),
             c2=L.Convolution2D(None,    8, 3,stride=2),
             c3=L.Convolution2D(None,   16, 3,stride=2),
@@ -118,7 +90,7 @@ class SunPredictor(chainer.Chain):
 
 
 model = SunPredictor()
-opt = chainer.optimizers.Adam()
+opt = chainer.optimizers.SMORMS3()
 opt.use_cleargrads()
 opt.setup(model)
 
@@ -128,7 +100,7 @@ while True:
     dt = datetime.timedelta(hours = dt_hours)
 
     t = datetime.datetime(2011,1,1,0,00,00) +  datetime.timedelta(minutes = random.randrange(60*24*365*5))
-    print epoch, t
+    print(epoch, t)
     img_input = get_normalized_image_variable(t)
     if img_input is None:
         continue
@@ -143,13 +115,13 @@ while True:
     model.cleargrads()
     loss.backward()
     opt.update()
-    serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelength, dt_hours), model)
 
     epoch+=1
 
-    subprocess.call("rm /tmp/*", shell=True)
-
     if vizualization_mode:
+        serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelength, dt_hours), model)
+
+
         plot_sun_image(img_input.data[0,0], "image-input.png", title = 'input at {}'.format(t))
         plot_sun_image(img_observed.data[0,0], "image-observed.png", title = 'observed at {}'.format(t+dt))
 
@@ -158,5 +130,4 @@ while True:
             t2 += dt
             img_input = model(img_input)
             plot_sun_image(img_input.data[0,0], "image-predict-{}.png".format(i), title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
-        subprocess.call("zip images.zip -r *.png", shell=True)
-        subprocess.call("base64 images.zip > images.zip.base64",shell=True)
+        subprocess.call("convert -delay 50 image-input.png image-predict*.png movie.gif", shell=True)
