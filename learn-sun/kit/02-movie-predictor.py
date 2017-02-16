@@ -30,6 +30,8 @@ image_size = 1023
 image_wavelength = 211
 dt_hours = 4
 
+gpuid=0
+
 
 def get_normalized_image_variable(time, wavelength = image_wavelength):
     img = get_sun_image(time, wavelength)
@@ -38,7 +40,10 @@ def get_normalized_image_variable(time, wavelength = image_wavelength):
     img = img[np.newaxis, np.newaxis, :, :]
     img = img.astype(np.float32)
     x = Variable(img)
-    return F.sigmoid(x / 100)
+    ret =  F.sigmoid(x / 100)
+    if gpuid >= 0:
+        ret.to_gpu()
+    return ret
 
 
 def plot_sun_image(img, filename, wavelength=image_wavelength, title = '', vmin=0.5, vmax = 1.0):
@@ -93,6 +98,11 @@ model = SunPredictor()
 opt = chainer.optimizers.SMORMS3()
 opt.use_cleargrads()
 opt.setup(model)
+
+if gpuid >= 0:
+    chainer.cuda.get_device(gpuid).use()  # Make a specified GPU current
+    model.to_gpu()
+
 
 epoch = 0
 while True:

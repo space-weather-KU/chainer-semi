@@ -58,7 +58,8 @@ def get_normalized_image_variable(time, wavelength):
         ret = F.sigmoid(x / 30)
     else:
         ret = F.log(F.max(1,x))
-    ret.to_gpu()
+    if gpuid >= 0:
+        ret.to_gpu()
     return ret
 
 """

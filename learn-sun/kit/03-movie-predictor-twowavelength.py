@@ -41,11 +41,14 @@ def get_normalized_image_variable(time, wavelength):
     img = img.astype(np.float32)
     x = Variable(img)
     if wavelength == 211:
-        return F.sigmoid(x / 100)
+        ret = F.sigmoid(x / 100)
     elif wavelength == 193:
-        return F.sigmoid(x / 300)
+        ret = F.sigmoid(x / 300)
     else:
-        return F.log(F.max(1,x))
+        ret = F.log(F.max(1,x))
+    if gpuid >= 0:
+        ret.to_gpu()
+    return ret
 
 
 
@@ -98,6 +101,10 @@ class SunPredictor(chainer.Chain):
 model = SunPredictor()
 optimizer.use_cleargrads()
 optimizer.setup(model)
+
+if gpuid >= 0:
+    chainer.cuda.get_device(gpuid).use()  # Make a specified GPU current
+    model.to_gpu()
 
 epoch = 0
 while True:
