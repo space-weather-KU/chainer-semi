@@ -106,7 +106,7 @@ while True:
     vizualization_mode = (epoch%10 == 0)
     dt = datetime.timedelta(hours = dt_hours)
 
-    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(minutes = random.randrange(60*24*365*5))
+    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(hours = random.randrange(24*365*5))
     print(epoch, t)
 
     img_inputs = []

@@ -26,13 +26,18 @@ from chainer import links as L
 from chainer import functions as F
 from chainer import Variable, optimizers
 
-image_size = 1023
 image_wavelengths = [211,193]
 image_wavelength = "no default"
-optimizer = chainer.optimizers.SMORMS3()
+optimizer_p = chainer.optimizers.SMORMS3()
+optimizer_d = chainer.optimizers.SMORMS3()
+optimizer_g = chainer.optimizers.SMORMS3()
 
 dt_hours = 4
 
+"""
+Returns the brightness-normalized image of the Sun
+depending on the wavelength.
+"""
 def get_normalized_image_variable(time, wavelength):
     img = get_sun_image(time, wavelength)
     if img is None:
@@ -44,11 +49,16 @@ def get_normalized_image_variable(time, wavelength):
         return F.sigmoid(x / 100)
     elif wavelength == 193:
         return F.sigmoid(x / 300)
+    elif wavelength == 94:
+        return F.sigmoid(x / 30)
     else:
         return F.log(F.max(1,x))
 
 
-
+"""
+Plot the image of the sun using the
+SDO-AIA map.
+"""
 def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
     cmap = plt.get_cmap('sdoaia{}'.format(wavelength))
     plt.title(title)
@@ -75,7 +85,6 @@ class SunPredictor(chainer.Chain):
             d1=L.Deconvolution2D(None,  len(image_wavelengths), 3,stride=2)
         )
 
-
     def __call__(self, x):
         def f(x) :
             return F.elu(x)
@@ -94,19 +103,61 @@ class SunPredictor(chainer.Chain):
         h = F.sigmoid(self.d1(h))
         return h
 
+class Discriminator(chainer.Chain):
+    def __init__(self):
+        super(SunPredictor, self).__init__(
+            c1=L.Convolution2D(None,    4, 3,stride=2),
+            c2=L.Convolution2D(None,    8, 3,stride=2),
+            c3=L.Convolution2D(None,   16, 3,stride=2),
+            c4=L.Convolution2D(None,   32, 3,stride=2),
+            c5=L.Convolution2D(None,   64, 3,stride=2),
+            c6=L.Convolution2D(None,  128, 3,stride=2),
+            c7=L.Convolution2D(None,  256, 3,stride=2),
+            c8=L.Convolution2D(None,  512, 3,stride=2),
+            c9=L.Convolution2D(None, 1024, 3,stride=2),
+            l1=L.Linear(1024,1024),
+            l2=L.Linear(1024,1)
+        )
 
-model = SunPredictor()
-optimizer.use_cleargrads()
-optimizer.setup(model)
+
+    def __call__(self, x):
+        def f(x) :
+            return F.elu(x)
+        h = x
+        h = f(self.c1(h))
+        h = f(self.c2(h))
+        h = f(self.c3(h))
+        h = f(self.c4(h))
+        h = f(self.c5(h))
+        h = f(self.c6(h))
+        h = f(self.c7(h))
+        h = f(self.c8(h))
+        h = f(self.c9(h))
+        h = f(self.l1(h))
+        return self.l2(h)
+
+
+
+predictor = SunPredictor()
+optimizer_p.use_cleargrads()
+optimizer_p.setup(predictor)
+
+generator = SunPredictor()
+optimizer_g.use_cleargrads()
+optimizer_g.setup(generator)
+
+discriminator = Discriminator()
+optimizer_d.use_cleargrads()
+optimizer_d.setup(discriminator)
 
 epoch = 0
 while True:
     epoch+=1
 
-    vizualization_mode = (epoch%10 == 0)
+    visualization_mode = (epoch%10 == 0)
     dt = datetime.timedelta(hours = dt_hours)
 
-    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(minutes = random.randrange(60*24*365*5))
+    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(hours = random.randrange(24*365*5))
     print(epoch, t)
 
     img_inputs = []
@@ -131,19 +182,60 @@ while True:
     img_input = F.concat(img_inputs)
     img_observed = F.concat(img_observeds)
 
-    img_predicted = model(img_input)
+    img_predicted = predictor(img_input)
 
-    loss = F.sqrt(F.sum((img_predicted - img_observed)**2))
-    model.cleargrads()
+    loss = F.sum(abs(img_predicted - img_observed))
+    predictor.cleargrads()
     loss.backward()
-    optimizer.update()
+    optimizer_p.update()
 
 
-    if vizualization_mode:
+    """
+    Train the generator and discriminator
+    """
+    t2 = t
+    no_missing_image = True
+    img_future = img_input
+    for i in range(1,7):
+        t2 = t + i*dt
+        img_future = predictor(img_future)
+        img_observeds = []
+        for w in image_wavelengths:
+            img_observed = get_normalized_image_variable(t2,w)
+            if img_observed is None:
+                no_image = True
+                continue
+            img_observeds.append(img_observed)
+
+        if no_image: # some wavelength is not available for this t2
+            no_missing_image = False
+            continue
+
+        img_observed = F.concat(img_observeds)
+
+        img_generated = generator(img_future)
+
+        img_op = F.concat([img_future, img_observed])
+        img_og = F.concat([img_future, img_generated])
+
+        loss_d = abs(discriminator(img_op) - 1) + abs(discriminator(img_og) + 1)
+        discriminator.cleargrads()
+        loss_d.backward()
+        optimizer_d.update()
+
+        loss_g = abs(discriminator(img_og) - 1)
+        generator.cleargrads()
+        loss_g.backward()
+        optimizer_g.update()
+
+
+
+
+    if visualization_mode:
         for c in range(len(image_wavelengths)):
             wavelength = image_wavelengths[c]
 
-            plot_sun_image(img_input.data[0,c],
+            plot_sun_image(img_future.data[0,c],
                            "aia{}-image-input.png".format(wavelength),
                            wavelength,
                            title = 'input at {}'.format(t))
@@ -152,21 +244,26 @@ while True:
                            wavelength,
                            title = 'observed at {}'.format(t+dt))
 
-        t2 = t
-        for i in range(6):
-            t2 += dt
-
-            img_input = model(img_input)
+        img_future = img_input
+        for i in range(1,7):
+            t2 = t + i*dt
+            img_future = predictor(img_future)
+            img_generated = generator(img_future)
 
             for c in range(len(image_wavelengths)):
                 wavelength = image_wavelengths[c]
-                plot_sun_image(img_input.data[0,c],
+                plot_sun_image(img_future.data[0,c],
                                "aia{}-image-predict-{}.png".format(wavelength, i),
+                               wavelength,
+                               title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
+                plot_sun_image(img_generated.data[0,c],
+                               "aia{}-image-generated-{}.png".format(wavelength, i),
                                wavelength,
                                title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
 
         for c in range(len(image_wavelengths)):
             wavelength = image_wavelengths[c]
-            subprocess.call("convert -delay 50 aia{w}-image-input.png aia{w}-image-predict*.png aia{w}-movie.gif".format(w=wavelength), shell=True)
+            subprocess.call("convert -delay 50 aia{w}-image-input.png aia{w}-image-predict*.png aia{w}-movie-predicted.gif".format(w=wavelength), shell=True)
+            subprocess.call("convert -delay 50 aia{w}-image-input.png aia{w}-image-generated*.png aia{w}-movie-generated.gif".format(w=wavelength), shell=True)
 
-        serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelengths, dt_hours), model)
+        serializers.save_npz('sun-predictor-{}-{}hr.save'.format(image_wavelengths, dt_hours), predictor)
