@@ -145,7 +145,7 @@ class Discriminator(chainer.Chain):
         h = f(self.c8(h))
         h = f(self.c9(h))
         h = f(self.l1(h))
-        return self.l2(h)
+        return F.sigmoid(self.l2(h))
 
 
 
@@ -235,24 +235,30 @@ while True:
         img_op = F.concat([img_forecast, img_future])
         img_og = F.concat([img_forecast, img_generated])
 
-        loss_d = abs(discriminator(img_op) - 1) + abs(discriminator(img_og) + 1)
+        loss_d = - F.log(discriminator(img_op)) - F.log(1 - discriminator(img_og))
         discriminator.cleargrads()
         loss_d.backward()
         optimizer_d.update()
 
-        loss_g = abs(discriminator(img_og) - 1)
+        loss_g = - F.log(discriminator(img_og))
         generator.cleargrads()
         loss_g.backward()
         optimizer_g.update()
 
+        if visualization_mode:
+            with open("log.txt","a") as fp:
+                d_op = discriminator(img_op).data.get()[0,0]
+                d_og = discriminator(img_og).data.get()[0,0]
+
+                print("epoch",epoch, "range",i,\
+                      "L(dis)",loss_d.data.get()[0,0],\
+                      "L(gen)",loss_g.data.get()[0,0],\
+                      "D(pred)",d_op,\
+                      "D(gen)",d_og,\
+                      file=fp)
 
 
     if visualization_mode:
-        with open("log.txt","a") as fp:
-            print("epoch",epoch, "range",i,\
-                  "L(dis)",loss_d.data.get()[0,0],\
-                  "L(gen)",loss_g.data.get()[0,0],\
-                  file=fp)
         for c in range(len(image_wavelengths)):
             wavelength = image_wavelengths[c]
 
