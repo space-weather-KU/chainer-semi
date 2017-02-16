@@ -33,6 +33,8 @@ optimizer = chainer.optimizers.SMORMS3()
 
 dt_hours = 4
 
+gpuid=0
+
 def get_normalized_image_variable(time, wavelength):
     img = get_sun_image(time, wavelength)
     if img is None:
