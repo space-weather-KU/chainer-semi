@@ -166,6 +166,7 @@ while True:
                                title = 'epoch {} frame {} {}'.format(epoch, i+1, t2))
 
         for c in range(len(image_wavelengths)):
+            wavelength = image_wavelengths[c]
             subprocess.call("convert -delay 50 aia{w}-image-input.png aia{w}-image-predict*.png aia{w}-movie.gif".format(w=wavelength), shell=True)
 
         serializers.save_npz('sun-predictor-{}-{}hr.model'.format(image_wavelengths, dt_hours), model)
