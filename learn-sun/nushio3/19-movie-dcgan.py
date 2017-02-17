@@ -32,7 +32,7 @@ optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
 start_dcgan_at_epoch=0
 
-
+image_size = 1023
 use_textbook_dcgan = True
 
 dt_hours = 4
