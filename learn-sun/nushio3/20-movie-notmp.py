@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib
 matplotlib.use('Agg')
-import json, urllib, numpy as np, matplotlib.pylab as plt, matplotlib.ticker as mtick
+import json, urllib, numpy as np, matplotlib.pylab as plt, matplotlib.ticker as mtick, sys
 import sunpy.map
 from astropy.io import fits
 from sunpy.cm import color_tables as ct
