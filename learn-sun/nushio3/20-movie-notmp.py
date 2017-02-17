@@ -215,7 +215,7 @@ while True:
     visualization_mode = (epoch%10 == 0)
     dt = datetime.timedelta(hours = dt_hours)
 
-    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(hours = random.randrange(24*365*5))
+    t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(minutes = random.randrange(60*24*365*5))
     print(epoch, t)
 
     channel_inputs = []
@@ -300,14 +300,15 @@ while True:
             optimizer_g.update()
 
             if visualization_mode:
-                d_op = discriminator(img_op).data
-                d_og = discriminator(img_og).data
+                with open("log.txt","a") as fp:
+                    d_op = discriminator(img_op).data
+                    d_og = discriminator(img_og).data
 
-                print("epoch",epoch, "range",i,
-                      "L(dis)",loss_d.data,
-                      "L(gen)",loss_g.data,
-                      "D(future)",d_op,
-                      "D(gen)", d_og)
+                    print("epoch",epoch, "range",i,
+                          "L(dis)",loss_d.data,
+                          "L(gen)",loss_g.data,
+                          "D(future)",d_op,
+                          "D(gen)", d_og, file=fp)
 
 
     if visualization_mode:
