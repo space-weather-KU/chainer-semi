@@ -33,7 +33,6 @@ optimizer_g = chainer.optimizers.SMORMS3()
 start_dcgan_at_epoch=0
 
 image_size = 1023
-use_textbook_dcgan = True
 
 dt_hours = 4
 
@@ -51,7 +50,7 @@ def get_sun_image(time, wavelength):
         data = json.loads(response.read().decode())
         filename = data['segments'][0]['values'][0]
         url = "http://jsoc.stanford.edu"+filename
-        chromosphere_image = fits.open(url, cached=False)   # download the data
+        chromosphere_image = fits.open(url, cached="debug" in sys.argv)   # download the data
 
         T_REC = data['keywords'][0]['values'][0]
         CROTA2_AIA = float(data['keywords'][1]['values'][0])
@@ -154,17 +153,19 @@ class SunPredictor(chainer.Chain):
 class Discriminator(chainer.Chain):
     def __init__(self):
         super(Discriminator, self).__init__(
-            c1=L.Convolution2D(None,    4, 3,stride=2),
-            c2=L.Convolution2D(None,    8, 3,stride=2),
-            c3=L.Convolution2D(None,   16, 3,stride=2),
-            c4=L.Convolution2D(None,   32, 3,stride=2),
-            c5=L.Convolution2D(None,   64, 3,stride=2),
-            c6=L.Convolution2D(None,  128, 3,stride=2),
+            c1=L.Convolution2D(None,    4, 3,stride=2),#511
+            c2=L.Convolution2D(None,    8, 3,stride=2),#255
+            c3=L.Convolution2D(None,   16, 3,stride=2),#127
+            c4=L.Convolution2D(None,   32, 3,stride=2),# 63
+            c5=L.Convolution2D(None,   64, 3,stride=2),# 31
+            c6=L.Convolution2D(None,  128, 3,stride=2),# 15
             c7=L.Convolution2D(None,  256, 3,stride=2),
-            c8=L.Convolution2D(None,  512, 3,stride=2),
-            c9=L.Convolution2D(None, 1024, 3,stride=2),
-            l1=L.Linear(1024,1024),
-            l2=L.Linear(1024,1)
+            l9=L.Convolution2D(None,    1, 1,stride=1)
+
+#             c8=L.Convolution2D(None,  512, 3,stride=2),
+#             c9=L.Convolution2D(None, 1024, 3,stride=2),
+#             l1=L.Linear(1024,1024),
+#             l2=L.Linear(1024,1)
         )
 
 
@@ -179,14 +180,15 @@ class Discriminator(chainer.Chain):
         h = f(self.c5(h))
         h = f(self.c6(h))
         h = f(self.c7(h))
-        h = f(self.c8(h))
-        h = f(self.c9(h))
-        h = f(self.l1(h))
-        return self.l2(h)
+        return self.l9(h)
+#        h = f(self.c8(h))
+#        h = f(self.c9(h))
+#        h = f(self.l1(h))
+#        return self.l2(h)
 
 
 def sigmoid_cross_entropy(x,z):
-    return F.relu(x) - x * z + F.log(1 + F.exp(-abs(x)))
+    return F.sum(F.relu(x) - x * z + F.log(1 + F.exp(-abs(x))))
 
 predictor = SunPredictor()
 optimizer_p.use_cleargrads()
@@ -216,6 +218,9 @@ while True:
     dt = datetime.timedelta(hours = dt_hours)
 
     t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(minutes = random.randrange(60*24*365*5))
+    if "debug" in sys.argv:
+        t = datetime.datetime(2011,1,1,0,00,00)
+
     print(epoch, t)
 
     channel_inputs = []
@@ -278,23 +283,14 @@ while True:
             img_op = F.concat([img_forecast, img_future])
             img_og = F.concat([img_forecast, img_generated])
 
-            if use_textbook_dcgan:
-                loss_d = sigmoid_cross_entropy(discriminator(img_op), 0.9) + \
-                         sigmoid_cross_entropy(discriminator(img_og), 0.0)
-                #loss_d = -0.9 * F.log(discriminator(img_op)) \
-                #         -0.1 * F.log(1 - discriminator(img_op)) \
-                #         - F.log(1 - discriminator(img_og))
-            else:
-                loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
+            loss_d = sigmoid_cross_entropy(discriminator(img_op), 0.9) + \
+                     sigmoid_cross_entropy(discriminator(img_og), 0.0)
             discriminator.cleargrads()
             loss_d.backward()
             optimizer_d.update()
 
-            if use_textbook_dcgan:
-                loss_g = sigmoid_cross_entropy(discriminator(img_og), 1.0)
-                #loss_g = -F.log(discriminator(img_og))
-            else:
-                loss_g = (discriminator(img_og)-1)**2
+            loss_g = sigmoid_cross_entropy(discriminator(img_og), 1.0)
+
             generator.cleargrads()
             loss_g.backward()
             optimizer_g.update()
