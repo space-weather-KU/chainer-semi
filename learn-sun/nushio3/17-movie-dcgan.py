@@ -41,7 +41,7 @@ if gpuid >= 0:
     chainer.cuda.get_device(gpuid).use()
 
 
-def get_sun_image(time, wavelength = image_wavelength):
+def get_sun_image(time, wavelength):
     try:
         time_str = time.strftime("%Y.%m.%d_%H:%M:%S")
 
