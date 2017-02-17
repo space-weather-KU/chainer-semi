@@ -32,6 +32,7 @@ optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
 start_dcgan_at_epoch=0
 
+
 use_textbook_dcgan = True
 
 dt_hours = 4
@@ -40,7 +41,7 @@ gpuid=-1
 if gpuid >= 0:
     chainer.cuda.get_device(gpuid).use()
 
-
+image_size = 1023
 def get_sun_image(time, wavelength):
     try:
         time_str = time.strftime("%Y.%m.%d_%H:%M:%S")
