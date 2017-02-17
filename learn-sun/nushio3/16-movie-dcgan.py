@@ -206,6 +206,9 @@ if gpuid >= 0:
 
 epoch = 0
 while True:
+    subprocess.call("rm /tmp/*", shell=True)
+
+
     epoch+=1
 
     visualization_mode = (epoch%10 == 0)
