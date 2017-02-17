@@ -214,7 +214,7 @@ while True:
 
     epoch+=1
 
-    visualization_mode = (epoch%10 == 0)
+    visualization_mode = (epoch%10 == 0) or epoch < 3
     dt = datetime.timedelta(hours = dt_hours)
 
     t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(minutes = random.randrange(60*24*365*5))
