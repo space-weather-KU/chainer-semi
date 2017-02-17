@@ -299,15 +299,14 @@ while True:
             optimizer_g.update()
 
             if visualization_mode:
-                with open("log.txt","a") as fp:
-                    d_op = discriminator(img_op).data
-                    d_og = discriminator(img_og).data
+                d_op = discriminator(img_op).data
+                d_og = discriminator(img_og).data
 
-                    print("epoch",epoch, "range",i,
-                          "L(dis)",loss_d.data,
-                          "L(gen)",loss_g.data,
-                          "D(future)",d_op,
-                          "D(gen)", d_og, file=fp)
+                print("epoch",epoch, "range",i,
+                      "L(dis)",loss_d.data,
+                      "L(gen)",loss_g.data,
+                      "D(future)",d_op,
+                      "D(gen)", d_og)
 
 
     if visualization_mode:
