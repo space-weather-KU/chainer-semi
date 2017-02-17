@@ -297,8 +297,11 @@ while True:
 
             if visualization_mode:
                 with open("log.txt","a") as fp:
-                    d_op = discriminator(img_op).data
-                    d_og = discriminator(img_og).data
+                    def sample(xs):
+                        return(np.min(xs), np.median(xs), np.max(xs))
+
+                    d_op = sample(discriminator(img_op).data)
+                    d_og = sample(discriminator(img_og).data)
 
                     print("epoch",epoch, "range",i,
                           "L(dis)",loss_d.data,
