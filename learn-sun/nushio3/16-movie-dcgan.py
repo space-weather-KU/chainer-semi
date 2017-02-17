@@ -303,12 +303,11 @@ while True:
                     d_op = discriminator(img_op).data
                     d_og = discriminator(img_og).data
 
-                    print("epoch",epoch, "range",i,\
-                          "L(dis)",loss_d.data,\
-                          "L(gen)",loss_g.data,\
-                          "D(future)",d_op,\
-                          "D(gen)",d_og,\
-                          file=fp)
+                    print("epoch",epoch, "range",i,
+                          "L(dis)",loss_d.data,
+                          "L(gen)",loss_g.data,
+                          "D(future)",d_op,
+                          "D(gen)", d_og, file=fp)
 
 
     if visualization_mode:
