@@ -115,7 +115,7 @@ def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
 
 
 
-M=4
+M=2
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
