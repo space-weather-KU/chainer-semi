@@ -114,21 +114,23 @@ def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
     plt.close("all")
 
 
+
+M=4
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
             # the size of the inputs to each layer will be inferred
-            c1=L.Convolution2D(None,    4, 3,stride=2),
-            c2=L.Convolution2D(None,    8, 3,stride=2),
-            c3=L.Convolution2D(None,   16, 3,stride=2),
-            c4=L.Convolution2D(None,   32, 3,stride=2),
-            c5=L.Convolution2D(None,   64, 3,stride=2),
-            c6=L.Convolution2D(None,  128, 3,stride=2),
-            d6=L.Deconvolution2D(None, 64, 3,stride=2),
-            d5=L.Deconvolution2D(None, 32, 3,stride=2),
-            d4=L.Deconvolution2D(None, 16, 3,stride=2),
-            d3=L.Deconvolution2D(None,  8, 3,stride=2),
-            d2=L.Deconvolution2D(None,  4, 3,stride=2),
+            c1=L.Convolution2D(None,    4*M, 3,stride=2),
+            c2=L.Convolution2D(None,    8*M, 3,stride=2),
+            c3=L.Convolution2D(None,   16*M, 3,stride=2),
+            c4=L.Convolution2D(None,   32*M, 3,stride=2),
+            c5=L.Convolution2D(None,   64*M, 3,stride=2),
+            c6=L.Convolution2D(None,  128*M, 3,stride=2),
+            d6=L.Deconvolution2D(None, 64*M, 3,stride=2),
+            d5=L.Deconvolution2D(None, 32*M, 3,stride=2),
+            d4=L.Deconvolution2D(None, 16*M, 3,stride=2),
+            d3=L.Deconvolution2D(None,  8*M, 3,stride=2),
+            d2=L.Deconvolution2D(None,  4*M, 3,stride=2),
             d1=L.Deconvolution2D(None,  len(image_wavelengths), 3,stride=2)
         )
 
@@ -153,15 +155,15 @@ class SunPredictor(chainer.Chain):
 class Discriminator(chainer.Chain):
     def __init__(self):
         super(Discriminator, self).__init__(
-            c1=L.Convolution2D(None,    4, 3,stride=2),#511
-            c2=L.Convolution2D(None,    8, 3,stride=2),#255
-            c3=L.Convolution2D(None,   16, 3,stride=2),#127
-            c4=L.Convolution2D(None,   32, 3,stride=2),# 63
-            c5=L.Convolution2D(None,   64, 3,stride=2),# 31
-            c6=L.Convolution2D(None,  128, 3,stride=2),# 15
-            c7=L.Convolution2D(None,  256, 3,stride=2),
-            l9=L.Convolution2D(None,    1, 1,stride=1)
+            c1=L.Convolution2D(None,    4*M, 3,stride=2),#511
+            c2=L.Convolution2D(None,    8*M, 3,stride=2),#255
+            c3=L.Convolution2D(None,   16*M, 3,stride=2),#127
+            c4=L.Convolution2D(None,   32*M, 3,stride=2),# 63
+            c5=L.Convolution2D(None,   64*M, 3,stride=2),# 31
+            c6=L.Convolution2D(None,  128*M, 3,stride=2),# 15
+            l9=L.Convolution2D(None,      1, 1,stride=1)
 
+#             c7=L.Convolution2D(None,  256, 3,stride=2),
 #             c8=L.Convolution2D(None,  512, 3,stride=2),
 #             c9=L.Convolution2D(None, 1024, 3,stride=2),
 #             l1=L.Linear(1024,1024),
@@ -179,8 +181,8 @@ class Discriminator(chainer.Chain):
         h = f(self.c4(h))
         h = f(self.c5(h))
         h = f(self.c6(h))
-        h = f(self.c7(h))
         return self.l9(h)
+#        h = f(self.c7(h))
 #        h = f(self.c8(h))
 #        h = f(self.c9(h))
 #        h = f(self.l1(h))
