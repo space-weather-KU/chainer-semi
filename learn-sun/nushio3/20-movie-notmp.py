@@ -50,20 +50,10 @@ def get_sun_image(time, wavelength):
         data = json.loads(response.read().decode())
         filename = data['segments'][0]['values'][0]
         url = "http://jsoc.stanford.edu"+filename
-        chromosphere_image = fits.open(url, cached="debug" in sys.argv)   # download the data
+        aia_image = fits.open(url, cached="debug" in sys.argv)   # download the data
 
-        T_REC = data['keywords'][0]['values'][0]
-        CROTA2_AIA = float(data['keywords'][1]['values'][0])
-        CDELT1_AIA = float(data['keywords'][2]['values'][0])
-        CDELT2_AIA = float(data['keywords'][3]['values'][0])
-        CRPIX1_AIA = float(data['keywords'][4]['values'][0])
-        CRPIX2_AIA = float(data['keywords'][5]['values'][0])
-        CRVAL1_AIA = float(data['keywords'][6]['values'][0])
-        CRVAL2_AIA = float(data['keywords'][7]['values'][0])
-
-
-        chromosphere_image.verify("fix")
-        exptime = chromosphere_image[1].header['EXPTIME']
+        aia_image.verify("fix")
+        exptime = aia_image[1].header['EXPTIME']
         if exptime <= 0:
             return None
         quality = aia_image[1].header['QUALITY']
@@ -71,8 +61,8 @@ def get_sun_image(time, wavelength):
             print(time, "bad quality",file=sys.stderr)
             return None
 
-        original_width = chromosphere_image[1].data.shape[0]
-        return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
+        original_width = aia_image[1].data.shape[0]
+        return interpolation.zoom(aia_image[1].data, image_size / float(original_width)) / exptime
     except Exception as e:
         print(e)
         return None
