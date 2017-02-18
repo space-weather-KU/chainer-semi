@@ -108,10 +108,12 @@ def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
     plt.close("all")
 
 
-t = datetime.datetime(2016,1,2,3,0)
+t = datetime.datetime(2015,1,1)
 
 
 for ctr  in range(6):
     t1 = t + ctr * datetime.timedelta(seconds = 12)
     img = get_normalized_image_variable(t1, 211)
+    if img is None:
+        print("image missing: ", t1)
     plot_sun_image(img, "slowmotion-{}.png".format(ctr), 211, str(t1))
