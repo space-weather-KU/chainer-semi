@@ -154,7 +154,7 @@ class SunPredictor(chainer.Chain):
 
 class SunGenerator(chainer.Chain):
     def __init__(self):
-        super(SunPredictor, self).__init__(
+        super(SunGenerator, self).__init__(
             # the size of the inputs to each layer will be inferred
             c1=L.Convolution2D(None,    4*M, 3,stride=2),
             c2=L.Convolution2D(None,    8*M, 3,stride=2),
@@ -180,11 +180,11 @@ class SunGenerator(chainer.Chain):
         h4 = f(self.c4(h3))
         h5 = f(self.c5(h4))
         h6 = f(self.c6(h5))
-        i5 = F.concat([f(self.d6(h6)),h5)
-        i4 = F.concat([f(self.d5(i5)),h4)
-        i3 = F.concat([f(self.d4(i4)),h3)
-        i2 = F.concat([f(self.d3(i3)),h2)
-        i1 = F.concat([f(self.d2(i2)),h1)
+        i5 = F.concat([f(self.d6(h6)),h5])
+        i4 = F.concat([f(self.d5(i5)),h4])
+        i3 = F.concat([f(self.d4(i4)),h3])
+        i2 = F.concat([f(self.d3(i3)),h2])
+        i1 = F.concat([f(self.d2(i2)),h1])
         i0 = F.sigmoid(self.d1(i1))
         return i0
 
