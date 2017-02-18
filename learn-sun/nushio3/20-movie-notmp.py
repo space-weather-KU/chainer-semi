@@ -136,7 +136,7 @@ class SunPredictor(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.elu(x)
+            return F.softplus(x)
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
@@ -172,7 +172,7 @@ class SunGenerator(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.elu(x)
+            return F.softplus(x)
         h0 = x
         h1 = f(self.c1(h0))
         h2 = f(self.c2(h1))
@@ -209,7 +209,7 @@ class Discriminator(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.dropout(F.leaky_relu(x))
+            return F.dropout(F.softplus(x))
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
