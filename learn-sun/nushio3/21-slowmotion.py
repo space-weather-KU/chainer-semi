@@ -116,4 +116,4 @@ for ctr  in range(6):
     img = get_normalized_image_variable(t1, 211)
     if img is None:
         print("image missing: ", t1)
-    plot_sun_image(img, "slowmotion-{}.png".format(ctr), 211, str(t1))
+    plot_sun_image(img.data[0,0], "slowmotion-{}.png".format(ctr), 211, str(t1))
