@@ -66,6 +66,10 @@ def get_sun_image(time, wavelength):
         exptime = chromosphere_image[1].header['EXPTIME']
         if exptime <= 0:
             return None
+        quality = aia_image[1].header['QUALITY']
+        if quality !=0:
+            print(time, "bad quality",file=sys.stderr)
+            return None
 
         original_width = chromosphere_image[1].data.shape[0]
         return interpolation.zoom(chromosphere_image[1].data, image_size / float(original_width)) / exptime
@@ -136,7 +140,7 @@ class SunPredictor(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.softplus(x)
+            return F.elu(x)
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
@@ -172,7 +176,7 @@ class SunGenerator(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.softplus(x)
+            return F.elu(x)
         h0 = x
         h1 = f(self.c1(h0))
         h2 = f(self.c2(h1))
@@ -209,7 +213,7 @@ class Discriminator(chainer.Chain):
 
     def __call__(self, x):
         def f(x) :
-            return F.dropout(F.softplus(x))
+            return F.dropout(F.elu(x))
         h = x
         h = f(self.c1(h))
         h = f(self.c2(h))
