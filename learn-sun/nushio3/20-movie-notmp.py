@@ -161,13 +161,13 @@ class Discriminator(chainer.Chain):
             c4=L.Convolution2D(None,   32*M, 3,stride=2),# 63
             c5=L.Convolution2D(None,   64*M, 3,stride=2),# 31
             c6=L.Convolution2D(None,  128*M, 3,stride=2),# 15
-            l9=L.Convolution2D(None,      1, 1,stride=1)
-
-#             c7=L.Convolution2D(None,  256, 3,stride=2),
-#             c8=L.Convolution2D(None,  512, 3,stride=2),
-#             c9=L.Convolution2D(None, 1024, 3,stride=2),
-#             l1=L.Linear(1024,1024),
-#             l2=L.Linear(1024,1)
+            c7=L.Convolution2D(None,  256*M, 3,stride=2),#  7
+            l1=L.Convolution2D(None,  256*M, 1,stride=1),
+            l2=L.Convolution2D(None,      1, 1,stride=1)
+#            c8=L.Convolution2D(None,  512*M, 3,stride=2),
+#            c9=L.Convolution2D(None, 1024*M, 3,stride=2),
+#            l1=L.Linear(1024*M,1024),
+#            l2=L.Linear(1024,1)
         )
 
 
@@ -181,8 +181,11 @@ class Discriminator(chainer.Chain):
         h = f(self.c4(h))
         h = f(self.c5(h))
         h = f(self.c6(h))
-        return self.l9(h)
-#        h = f(self.c7(h))
+        h = f(self.c7(h))
+        h = f(self.l1(h))
+        h = self.l2(h)
+        return F.sum(h, axis=(2,3))
+
 #        h = f(self.c8(h))
 #        h = f(self.c9(h))
 #        h = f(self.l1(h))
