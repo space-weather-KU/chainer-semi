@@ -30,7 +30,7 @@ image_wavelengths = [211]
 optimizer_p = chainer.optimizers.SMORMS3()
 optimizer_d = chainer.optimizers.SMORMS3()
 optimizer_g = chainer.optimizers.SMORMS3()
-start_dcgan_at_epoch=0
+start_dcgan_at_epoch=1000
 
 image_size = 1023
 
