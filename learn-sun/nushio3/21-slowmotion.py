@@ -51,7 +51,7 @@ def get_sun_image(time, wavelength):
         data = json.loads(response.read().decode())
         filename = data['segments'][0]['values'][0]
         url = "http://jsoc.stanford.edu"+filename
-        aia_image = fits.open(url, cached="debug" in sys.argv)   # download the data
+        aia_image = fits.open(url, cached=True)   # download the data
 
         aia_image.verify("fix")
         exptime = aia_image[1].header['EXPTIME']
