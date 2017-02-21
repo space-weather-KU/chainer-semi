@@ -4,17 +4,19 @@
 
 まず、Web-UIのURL http://54.238.211.181:8080/hello にアクセス。
 
+
+
 ![](https://github.com/nushio3/tsubacloume/raw/master/figure/hello.png)
 
 ユーザーとパスワードを聞かれるので入力する。すると、以下のようなソースコードを投稿する画面になる。
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/submit.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submit.png)
 
 - Job nameは、このジョブを区別できる分かりやすい名前を英数字を使って指定する(32文字まで有効)。
 - time limitは1時間単位で、最大24時刊まで指定できる。
 - ソースコード欄には実行したいソースコードを記入する。既存のサンプル集 https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/kit/ にあるソースコードや、すでに[Files](http://54.238.211.181/) 以下に投稿されているフォルダのmain.pyを投稿できる。
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/submit-code.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submit-code.png)
 
 Submitボタンを押すと以下の画面に移動する。
 
@@ -22,7 +24,7 @@ Submitボタンを押すと以下の画面に移動する。
 
 現在のジョブの実行状況や
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/job status.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/job status.png)
 
 ジョブの生成したファイルの一覧が見れる。
 
