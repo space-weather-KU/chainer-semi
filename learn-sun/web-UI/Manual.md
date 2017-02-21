@@ -6,7 +6,7 @@
 
 
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/hello.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/hello.png)
 
 ユーザーとパスワードを聞かれるので入力する。すると、以下のようなソースコードを投稿する画面になる。
 
@@ -28,4 +28,4 @@ Submitボタンを押すと以下の画面に移動する。
 
 ジョブの生成したファイルの一覧が見れる。
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/files.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/files.png)
