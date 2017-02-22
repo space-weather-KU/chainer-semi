@@ -37,6 +37,11 @@ use_textbook_dcgan = True
 
 dt_hours = 4
 
+Mp=1
+Mg=1
+Md=1
+
+
 gpuid=0
 if gpuid >= 0:
     chainer.cuda.get_device(gpuid).use()
@@ -63,7 +68,7 @@ def get_normalized_image_variable(time, wavelength):
     elif wavelength == 94:
         ret = F.sigmoid(x / 30)
     else:
-        ret = F.log(F.max(1,x))
+        ret = F.log(1+F.relu(x))
 
     return ret
 
@@ -82,22 +87,21 @@ def plot_sun_image(img, filename, wavelength, title = '', vmin=0.5, vmax = 1.0):
     plt.close("all")
 
 
-M=1
 class SunPredictor(chainer.Chain):
     def __init__(self):
         super(SunPredictor, self).__init__(
             # the size of the inputs to each layer will be inferred
-            c1=L.Convolution2D(None,    4*M, 3,stride=2),
-            c2=L.Convolution2D(None,    8*M, 3,stride=2),
-            c3=L.Convolution2D(None,   16*M, 3,stride=2),
-            c4=L.Convolution2D(None,   32*M, 3,stride=2),
-            c5=L.Convolution2D(None,   64*M, 3,stride=2),
-            c6=L.Convolution2D(None,  128*M, 3,stride=2),
-            d6=L.Deconvolution2D(None, 64*M, 3,stride=2),
-            d5=L.Deconvolution2D(None, 32*M, 3,stride=2),
-            d4=L.Deconvolution2D(None, 16*M, 3,stride=2),
-            d3=L.Deconvolution2D(None,  8*M, 3,stride=2),
-            d2=L.Deconvolution2D(None,  4*M, 3,stride=2),
+            c1=L.Convolution2D(None,    4*Mp, 3,stride=2),
+            c2=L.Convolution2D(None,    8*Mp, 3,stride=2),
+            c3=L.Convolution2D(None,   16*Mp, 3,stride=2),
+            c4=L.Convolution2D(None,   32*Mp, 3,stride=2),
+            c5=L.Convolution2D(None,   64*Mp, 3,stride=2),
+            c6=L.Convolution2D(None,  128*Mp, 3,stride=2),
+            d6=L.Deconvolution2D(None, 64*Mp, 3,stride=2),
+            d5=L.Deconvolution2D(None, 32*Mp, 3,stride=2),
+            d4=L.Deconvolution2D(None, 16*Mp, 3,stride=2),
+            d3=L.Deconvolution2D(None,  8*Mp, 3,stride=2),
+            d2=L.Deconvolution2D(None,  4*Mp, 3,stride=2),
             d1=L.Deconvolution2D(None,  len(image_wavelengths), 3,stride=2)
         )
 
@@ -123,17 +127,17 @@ class SunGenerator(chainer.Chain):
     def __init__(self):
         super(SunGenerator, self).__init__(
             # the size of the inputs to each layer will be inferred
-            c1=L.Convolution2D(None,    4*M, 3,stride=2),
-            c2=L.Convolution2D(None,    8*M, 3,stride=2),
-            c3=L.Convolution2D(None,   16*M, 3,stride=2),
-            c4=L.Convolution2D(None,   32*M, 3,stride=2),
-            c5=L.Convolution2D(None,   64*M, 3,stride=2),
-            c6=L.Convolution2D(None,  128*M, 3,stride=2),
-            d6=L.Deconvolution2D(None, 64*M, 3,stride=2),
-            d5=L.Deconvolution2D(None, 32*M, 3,stride=2),
-            d4=L.Deconvolution2D(None, 16*M, 3,stride=2),
-            d3=L.Deconvolution2D(None,  8*M, 3,stride=2),
-            d2=L.Deconvolution2D(None,  4*M, 3,stride=2),
+            c1=L.Convolution2D(None,    4*Mg, 3,stride=2),
+            c2=L.Convolution2D(None,    8*Mg, 3,stride=2),
+            c3=L.Convolution2D(None,   16*Mg, 3,stride=2),
+            c4=L.Convolution2D(None,   32*Mg, 3,stride=2),
+            c5=L.Convolution2D(None,   64*Mg, 3,stride=2),
+            c6=L.Convolution2D(None,  128*Mg, 3,stride=2),
+            d6=L.Deconvolution2D(None, 64*Mg, 3,stride=2),
+            d5=L.Deconvolution2D(None, 32*Mg, 3,stride=2),
+            d4=L.Deconvolution2D(None, 16*Mg, 3,stride=2),
+            d3=L.Deconvolution2D(None,  8*Mg, 3,stride=2),
+            d2=L.Deconvolution2D(None,  4*Mg, 3,stride=2),
             d1=L.Deconvolution2D(None,  len(image_wavelengths), 3,stride=2)
         )
 
@@ -158,14 +162,14 @@ class SunGenerator(chainer.Chain):
 class Discriminator(chainer.Chain):
     def __init__(self):
         super(Discriminator, self).__init__(
-            c1=L.Convolution2D(None,    4*M, 3,stride=2),#511
-            c2=L.Convolution2D(None,    8*M, 3,stride=2),#255
-            c3=L.Convolution2D(None,   16*M, 3,stride=2),#127
-            c4=L.Convolution2D(None,   32*M, 3,stride=2),# 63
-            c5=L.Convolution2D(None,   64*M, 3,stride=2),# 31
-            c6=L.Convolution2D(None,  128*M, 3,stride=2),# 15
-            c7=L.Convolution2D(None,  256*M, 3,stride=2),#  7
-            l1=L.Convolution2D(None,  256*M, 1,stride=1),
+            c1=L.Convolution2D(None,    4*Md, 3,stride=2),#511
+            c2=L.Convolution2D(None,    8*Md, 3,stride=2),#255
+            c3=L.Convolution2D(None,   16*Md, 3,stride=2),#127
+            c4=L.Convolution2D(None,   32*Md, 3,stride=2),# 63
+            c5=L.Convolution2D(None,   64*Md, 3,stride=2),# 31
+            c6=L.Convolution2D(None,  128*Md, 3,stride=2),# 15
+            c7=L.Convolution2D(None,  256*Md, 3,stride=2),#  7
+            l1=L.Convolution2D(None,  256*Md, 1,stride=1),
             l2=L.Convolution2D(None,      1, 1,stride=1)
 #            c8=L.Convolution2D(None,  512*M, 3,stride=2),
 #            c9=L.Convolution2D(None, 1024*M, 3,stride=2),
@@ -282,26 +286,26 @@ while True:
 
             img_generated = generator(img_forecast)
 
-            img_op = F.concat([img_forecast, img_future])
-            img_og = F.concat([img_forecast, img_generated])
+            img_po = F.concat([img_forecast, img_future])
+            img_pg = F.concat([img_forecast, img_generated])
 
             if use_textbook_dcgan:
-                loss_d = sigmoid_cross_entropy(discriminator(img_op), 0.9) + \
-                         sigmoid_cross_entropy(discriminator(img_og), 0.0)
-                #loss_d = -0.9 * F.log(discriminator(img_op)) \
-                #         -0.1 * F.log(1 - discriminator(img_op)) \
-                #         - F.log(1 - discriminator(img_og))
+                loss_d = sigmoid_cross_entropy(discriminator(img_po), 0.9) + \
+                         sigmoid_cross_entropy(discriminator(img_pg), 0.0)
+                #loss_d = -0.9 * F.log(discriminator(img_po)) \
+                #         -0.1 * F.log(1 - discriminator(img_po)) \
+                #         - F.log(1 - discriminator(img_pg))
             else:
-                loss_d = (discriminator(img_op)-1)**2 + (discriminator(img_og)+1)**2
+                loss_d = (discriminator(img_po)-1)**2 + (discriminator(img_pg)+1)**2
             discriminator.cleargrads()
             loss_d.backward()
             optimizer_d.update()
 
             if use_textbook_dcgan:
-                loss_g = sigmoid_cross_entropy(discriminator(img_og), 1.0)
-                #loss_g = -F.log(discriminator(img_og))
+                loss_g = sigmoid_cross_entropy(discriminator(img_pg), 1.0)
+                #loss_g = -F.log(discriminator(img_pg))
             else:
-                loss_g = (discriminator(img_og)-1)**2
+                loss_g = (discriminator(img_pg)-1)**2
             generator.cleargrads()
             loss_g.backward()
             optimizer_g.update()
@@ -311,8 +315,8 @@ while True:
                     def sample(xs):
                         return(np.min(xs), np.median(xs), np.max(xs))
 
-                    d_op = sample(discriminator(img_op).data.get())
-                    d_og = sample(discriminator(img_og).data.get())
+                    d_op = sample(discriminator(img_po).data.get())
+                    d_og = sample(discriminator(img_pg).data.get())
 
                     print("epoch",epoch, "range",i,
                           "L(dis)",loss_d.data.get(),
