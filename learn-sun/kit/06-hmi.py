@@ -15,9 +15,10 @@ from matplotlib.dates import *
 import math
 import scipy.ndimage.interpolation as interpolation
 import subprocess
+import sys
 import random
 
-from observational_data import *
+from observational_data import get_sun_image
 
 import chainer
 from chainer import datasets
@@ -60,6 +61,8 @@ def get_normalized_image_variable(time, wavelength):
     img = get_sun_image(time, wavelength)
     if img is None:
         return None
+
+
     img = img[np.newaxis, np.newaxis, :, :]
     img = img.astype(np.float32)
     x = Variable(img)
@@ -87,9 +90,10 @@ def plot_sun_image(img, filename, wavelength, title = '', vmin=None, vmax = 1.0)
     if gpuid >= 0:
         img = img.get()
 
+
     if vmin is None:
         if wavelength == 'hmi':
-            vmin = -1
+            vmin = -1.0
         else:
             vmin = 0.5
 
@@ -239,7 +243,7 @@ epoch = 0
 while True:
     epoch+=1
 
-    visualization_mode = (epoch%10 == 0)
+    visualization_mode = (epoch%10 == 0) or epoch < 3
     dt = datetime.timedelta(hours = dt_hours)
 
     t = datetime.datetime(2011,1,1,0,00,00) + datetime.timedelta(hours = random.randrange(24*365*5))
