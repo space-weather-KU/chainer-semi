@@ -43,9 +43,9 @@ use_textbook_dcgan = True
 
 dt_hours = 4
 
-Mp=1
-Mg=1
-Md=1
+Mp=6
+Mg=6
+Md=6
 
 
 gpuid=0
