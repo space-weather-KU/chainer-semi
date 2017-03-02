@@ -11,7 +11,9 @@
 ![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submit.png)
 
 - Job nameは、このジョブを区別できる分かりやすい名前を英数字を使って指定する(32文字まで有効)。
-- time limitは1時間単位で、最大24時刊まで指定できる。
+- time limitは1時間単位で、最大24時間まで指定できる。
+- select queue は、`S` または`G`を指定できる。`Service Utilization`を参考に、空いてそうな方を指定すると良い。
+- priority は、高い数字を指定するほど優先して実行される。
 - ソースコード欄には実行したいソースコードを記入する。既存のサンプル集 https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/kit/ のなかにあるソースコードや、すでに[Files](http://54.238.211.181/) 以下に投稿されて実験が成功しているフォルダの中から、main.pyは、ここに投稿できる形になっている。
 
 ![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submit-code.png)
