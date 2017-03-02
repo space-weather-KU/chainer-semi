@@ -1,5 +1,29 @@
 # 宇宙天気予報研究Web-UI 操作マニュアル
 
+## 何が出来るの？
+
+大きく分けて、以下の２つの実験ｗ用意しています。
+
+(1) 太陽画像からGoesフラックスの時系列予測 https://github.com/space-weather-KU/chainer-semi/blob/master/learn-sun/kit/01-goes-flux-predictor.py
+
+実行結果を参照ください。Goesフラックスの予想結果のグラフや、予測の平均誤差を出力します。
+http://54.238.211.181/2017/02/11/72h_94_J8YkjsJvN6wc/
+http://54.238.211.181/2017/02/11/72h_94_J8YkjsJvN6wc/prediction-history.png
+http://54.238.211.181/2017/02/11/72h_94_J8YkjsJvN6wc/stdout.txt
+
+
+(2) 太陽画像から太陽活動の将来画像予測 https://github.com/space-weather-KU/chainer-semi/blob/master/learn-sun/kit/06-hmi.py
+
+http://54.238.211.181/2017/02/24/HMI_94_211_miniYSIsm4y4S1MG/
+
+たとえば、こんな動画が出来ます：
+
+http://54.238.211.181/2017/02/22/seki_193_dt1_mp3_OMyebqutL0rO/aia193-movie-predicted.gif
+
+
+## 使い方
+
+
 まず、Web-UIのURL http://54.238.211.181:8080/hello にアクセス。
 
 
@@ -14,13 +38,23 @@
 - time limitは1時間単位で、最大24時間まで指定できる。
 - select queue は、`S` または`G`を指定できる。`Service Utilization`を参考に、空いてそうな方を指定すると良い。
 - priority は、高い数字を指定するほど優先して実行される。
-- ソースコード欄には実行したいソースコードを記入する。既存のサンプル集 https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/kit/ のなかにあるソースコードや、すでに[Files](http://54.238.211.181/) 以下に投稿されて実験が成功しているフォルダの中から、main.pyは、ここに投稿できる形になっている。
+- ソースコード欄には実行したいソースコードを記入する。既存のサンプル集 https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/kit/ のなかにあるソースコードや、すでに[Files](http://54.238.211.181/) 以下に投稿されて実験が成功しているフォルダの中から、main.pyは、ここに投稿できる形になっているので、その中から選んで投稿すればOK。
+
+
+まずは、以下のスクリプトのどちらかから試してみてください。
+
+- 太陽画像からGoesフラックスの時系列予測 https://github.com/space-weather-KU/chainer-semi/blob/master/learn-sun/kit/01-goes-flux-predictor.py
+- 太陽画像から太陽活動の将来画像予測 https://github.com/space-weather-KU/chainer-semi/blob/master/learn-sun/kit/06-hmi.py
+
+http://54.238.211.181/2017/02/24/HMI_94_211_miniYSIsm4y4S1MG/
+
+
 
 ![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submit-code.png)
 
 Submitボタンを押すと以下の画面に移動する。
 
-![](https://github.com/nushio3/tsubacloume/raw/master/figure/submitted.png)
+![](https://github.com/space-weather-KU/chainer-semi/raw/master/learn-sun/web-UI/figure/submitted.png)
 
 現在のジョブの実行状況や
 
